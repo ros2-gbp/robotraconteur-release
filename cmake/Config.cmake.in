@@ -1,0 +1,23 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/RobotRaconteurCoreTargets.cmake")
+if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/RobotRaconteurGenTargets.cmake")
+    include("${CMAKE_CURRENT_LIST_DIR}/RobotRaconteurGenTargets.cmake")
+	include("${CMAKE_CURRENT_LIST_DIR}/RobotRaconteurGenerateThunk.cmake")
+endif()
+
+include(CMakeFindDependencyMacro)
+
+find_package(Boost COMPONENTS date_time filesystem system regex chrono atomic thread random program_options REQUIRED)
+
+if(NOT WIN32)
+find_package(OpenSSL REQUIRED)
+endif()
+
+if(APPLE)
+
+endif()
+
+set(RobotRaconteur_INCLUDE_DIR   "@CMAKE_INSTALL_FULL_INCLUDEDIR@" )
+
+check_required_components("@PROJECT_NAME@")
