@@ -15,9 +15,11 @@ tracks:
     - git-bloom-generate -y rosrpm --prefix release/:{ros_distro} :{ros_distro} -i
       :{release_inc} --os-name rhel
     devel_branch: ros2-humble
+    last_release: v0.16.0-ros2-humble
+    last_version: 0.16.0
     name: upstream
     patches: null
-    release_inc: 0
+    release_inc: '1'
     release_repo_url: git@github.com:robotraconteur-packaging/robotraconteur-ros2-release.git
     release_tag: v0.16.0-ros2-humble
     ros_distro: humble
