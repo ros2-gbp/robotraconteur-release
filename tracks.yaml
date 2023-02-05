@@ -21,8 +21,8 @@ tracks:
     patches: null
     release_inc: '1'
     release_repo_url: git@github.com:robotraconteur-packaging/robotraconteur-ros-release.git
-    release_tag: v0.15.5-ros-noetic
+    release_tag: v0.16.0-ros-noetic
     ros_distro: noetic
     vcs_type: git
     vcs_uri: https://github.com/robotraconteur/robotraconteur.git
-    version: 0.15.5
+    version: 0.16.0
