@@ -1,3 +1,26 @@
+## robotraconteur (humble) - 0.16.0-4
+
+The packages in the `robotraconteur` repository were released into the `humble` distro by running `/usr/bin/bloom-release --rosdistro humble --track humble --edit robotraconteur` on `Wed, 08 Feb 2023 06:57:04 -0000`
+
+The `robotraconteur` package was released.
+
+Version of package(s) in repository `robotraconteur`:
+
+- upstream repository: https://github.com/robotraconteur/robotraconteur.git
+- release repository: https://github.com/robotraconteur-packaging/robotraconteur-ros2-release.git
+- rosdistro version: `0.16.0-2`
+- old version: `0.16.0-3`
+- new version: `0.16.0-4`
+
+Versions of tools used:
+
+- bloom version: `0.11.2`
+- catkin_pkg version: `0.5.2`
+- rosdep version: `0.22.1`
+- rosdistro version: `0.9.0`
+- vcstools version: `0.1.42`
+
+
 ## robotraconteur (humble) - 0.16.0-3
 
 The packages in the `robotraconteur` repository were released into the `humble` distro by running `/usr/bin/bloom-release --rosdistro humble --track humble --edit robotraconteur` on `Wed, 08 Feb 2023 04:05:05 -0000`
