@@ -176,6 +176,7 @@ class ServiceTestClient:
         nptest.assert_allclose(s1.multidimarray, np.array([-3.949071e-09, 2.753555e+10, -2.724923e+07, -3.553170e+09, -3.674923e+08, -2.479267e-22, -4.898990e+18, -3.561455e+19, 3.890325e+13, -4.980286e+18, 1.142884e-15, 1.570587e-12, 1.398743e-14, 1.769117e+11, 2.086717e+05, 2.986916e+13, -1.204547e-17, -6.138080e-08, -1.468512e-12, 3.240537e+11, 7.476873e+15, 1.627340e+19, -2.421611e-13, 3.549785e-20, 1.469061e+05, 4.172556e-06, -3.369810e-17, -4.639587e+10, 3.776574e-13, 4.990526e-08, -1.321627e+07, 4.224942e+10, -4.515185e-03, 3.619167e-12, 3.046092e+19, 3.712879e+03, -4.019784e-13, 4.005048e+18, 2.988709e-07, -4.123078e-06, -1.064380e+09, -1.931617e-18, 4.223366e-22, 1.783661e-19, -4.153799e+16, 1.591527e-10, -3.649908e-15, 4.348772e+18, -1.470750e-14, 1.637311e+08,
                                3.982951e-05, -1.304963e-04, -3.522058e-06, 3.869385e+02, -4.640831e-15, 1.292954e+00, -9.474137e+13, -4.196137e-17, -1.540996e+02, -1.742881e+00, -1.597433e-02, 4.062517e-04, -2.724799e-13, -4.113398e+05, -4.704501e+02, 2.977726e+04, -2.662004e+14, -1.376497e+04, -5.993109e-22, -1.265974e-15, 6.387767e+11, -2.696841e+04, -1.983347e+11, 3.214742e-13, 1.906709e-06, -6.956937e+12, 3.637926e-07, 2.706666e-16, -9.795675e-19, 7.311871e-15, 2.343927e-09, 1.709674e+18, 2.961079e-05, 4.009574e+11, 6.468308e-18, -4.041410e+11, 2.991768e-15, 4.240906e+19, 2.260404e-12, 4.786043e-03, 2.439493e-09, 1.698043e-13, 8.655885e-18, -2.598418e-15, 6.685593e+05, 2.895287e+13, -3.098095e-05, -3.764497e-06, 3.192785e-12, 2.098857e-08]).reshape((10, 10), order="F"))
         assert s1.var3.data == "This is a vartype string"
+        print(s1)
         s2 = RRN.NewStructure(
             "com.robotraconteur.testing.TestService1.teststruct1", self._r)
         s2.dat1 = [1.139065e-13, -1.909737e+06, 2.922498e+18, -1.566896e+15, 3.962168e+17, -3.165123e+17, -1.136212e+13, 3.041245e+16, -4.181809e-18, 3.605211e-18, -3.326815e-15, -4.686443e+05, -1.412792e+02, -3.823811e-14, -6.378268e-09, 1.260742e-14, -2.136740e-16, -4.074535e-10, 2.218924e+01, -3.400058e-08, 2.272064e+02, -2.982901e-21, 4.939616e-19, -4.745500e+03, -1.985464e+16, 3.374194e-04, -8.740159e-09, 1.470782e-06, -2.053287e+06, 4.007725e-13, -1.598806e-13, 2.693773e-06, -3.538743e-08,
@@ -497,11 +498,13 @@ class ServiceTestClient:
         o2_10_o2_1_32_o3_ind1.data2 = "Test string 1"
         o2_10_o2_1_32_o3_ind2.data2 = "Test string 2"
         self._r.o6_op(0)
+        time.sleep(0.1)
         o6_1 = self._r.get_o6()
         o6_1_1 = o6_1.get_o2_1()
         o6_1.d1 = [0.0]
         o6_1_1.data = "Hello world!"
         self._r.o6_op(1)
+        time.sleep(0.1)
         with pytest.raises(Exception):
             o6_1.d1 = [0.0]
         with pytest.raises(Exception):
@@ -510,12 +513,16 @@ class ServiceTestClient:
         o6_2 = self._r.get_o6()
         o6_2.data = "Hello world!"
         self._r.o6_op(2)
+        time.sleep(0.1)
         with pytest.raises(Exception):
             o6_2.data = "Hello world!"
         o6_3 = self._r.get_o6()
         o6_3.add_val(2)
 
     def TestPipes(self):
+
+        self._pipe_ack_lock = threading.Lock()
+
         self._ee1 = threading.Event()
         self._ee2 = threading.Event()
         self._ee3 = threading.Event()
@@ -528,7 +535,8 @@ class ServiceTestClient:
         e1.PacketAckReceivedEvent += self.ee1_ack_cb
         e2.PacketReceivedEvent += self.ee2_cb
         e3.PacketReceivedEvent += self.ee3_cb
-        self._packetnum = e1.SendPacket([1, 2, 3, 4])
+        with self._pipe_ack_lock:
+            self._packetnum = e1.SendPacket([1, 2, 3, 4])
         e1.SendPacket([5, 6, 7, 8])
         e1.SendPacket([-1, -2, -3, -5.32])
         e2.SendPacket([3.21])
@@ -544,17 +552,17 @@ class ServiceTestClient:
         e3.SendPacket(s2)
         assert self._ee1.wait(5)
         assert self._ee2.wait(5)
-        time.sleep(1)
-        # assert self._ee3.wait(5):
+        # time.sleep(1)
+        assert self._ee3.wait(5)
 
         ca(e1.ReceivePacket(), [1, 2, 3, 4])
-        ca(e1.ReceivePacket(), [5, 6, 7, 8])
-        ca(e1.ReceivePacket(), [-1, -2, -3, -5.32])
+        ca(e1.ReceivePacketWait(1), [5, 6, 7, 8])
+        ca(e1.ReceivePacketWait(1), [-1, -2, -3, -5.32])
         ca(e2.ReceivePacket(), [3.21])
-        ca(e2.ReceivePacket(), [4.72])
-        ca(e2.ReceivePacket(), [72.34])
+        ca(e2.ReceivePacketWait(1), [4.72])
+        ca(e2.ReceivePacketWait(1), [72.34])
         ca(e3.ReceivePacket().mydat, [738.29])
-        ca(e3.ReceivePacket().mydat, [89.83])
+        ca(e3.ReceivePacketWait(1).mydat, [89.83])
         time.sleep(.5)
         # assert self._ack_recv:
         self._r.pipe_check_error()
@@ -568,8 +576,6 @@ class ServiceTestClient:
         e3.Close()
 
     def ee1_cb(self, p):
-        if p.Available < 3:
-            return
         try:
             self._ee1.set()
 
@@ -577,13 +583,11 @@ class ServiceTestClient:
             pass
 
     def ee1_ack_cb(self, p, packetnum):
-
-        if packetnum == self._packetnum:
-            self._ack_recv = True
+        with self._pipe_ack_lock:
+            if packetnum == self._packetnum:
+                self._ack_recv = True
 
     def ee2_cb(self, p):
-        if p.Available < 3:
-            return
         try:
             self._ee2.set()
 
@@ -591,8 +595,6 @@ class ServiceTestClient:
             pass
 
     def ee3_cb(self, p):
-        if p.Available < 2:
-            return
         try:
             self._ee3.set()
 
