@@ -2,11 +2,12 @@
 
   - [Building](#building)
     - [Windows](#windows)
-    - [Ubuntu Focal](#ubuntu-focal)
+    - [Ubuntu Focal and Jammy](#ubuntu-focal)
     - [Ubuntu Bionic](#ubuntu-bionic)
     - [Mac OSX](#mac-osx)
     - [Swig](#swig)
     - [MATLAB Mex](#matlab-mex)
+    - [iOS](#ios)
 
 
 The software is tested using GitHub Actions continuous integration. See .github/workflows/main.yml for more information.
@@ -15,7 +16,7 @@ The software is tested using GitHub Actions continuous integration. See .github/
 
 Building the core library requires Visual Studio 2012 through 2019, Boost 1.72.0, and CMake. Follow the instructions on the Boost website to build Boost. Alternatively, Boost can be built using the [vcpkg](https://github.com/Microsoft/vcpkg) utility.
 
-### Ubuntu Focal
+### Ubuntu Focal and Jammy
 Install the dependencies:
 
 ```
@@ -76,3 +77,11 @@ https://github.com/swig/swig/wiki/Getting-Started for instructions.
 ### MATLAB Mex
 
 MATLAB install required for build. CMake FindMatlab module is used to locate the MATLAB build dependencies. Be sure to build the MEX file against static boost libraries. Linux will require Boost to be built from source with "-fPIC" C++ gcc option. The apt repository static libraries cannot be used because they were not built with "-fPIC".
+
+### iOS
+
+See https://github.com/robotraconteur/robotraconteur/wiki/iOS
+
+### Android
+
+See https://github.com/robotraconteur/robotraconteur/wiki/Android
