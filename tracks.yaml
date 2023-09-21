@@ -21,8 +21,8 @@ tracks:
     patches: null
     release_inc: '4'
     release_repo_url: git@github.com:robotraconteur-packaging/robotraconteur-ros2-release.git
-    release_tag: v0.16.0-4-ros2-humble
+    release_tag: v0.18.0-ros2-humble
     ros_distro: humble
     vcs_type: git
     vcs_uri: https://github.com/robotraconteur/robotraconteur.git
-    version: 0.16.0
+    version: 0.18.0
