@@ -112,6 +112,17 @@ bool IntraTransport::IsClient() const { return true; }
 
 std::string IntraTransport::GetUrlSchemeString() const { return "rr+intra"; }
 
+std::vector<std::string> IntraTransport::GetServerListenUrls()
+{
+    std::vector<std::string> o;
+    if (is_server)
+    {
+        NodeID nodeid = GetNode()->NodeID();
+        o.push_back("rr+intra://?nodeid=" + nodeid.ToString("D"));
+    }
+    return o;
+}
+
 bool IntraTransport::CanConnectService(boost::string_ref url) { return (boost::starts_with(url, "rr+intra://")); }
 
 void IntraTransport::AsyncCreateTransportConnection(
@@ -336,6 +347,7 @@ void IntraTransport::CloseTransportConnection_timed(const boost::system::error_c
 void IntraTransport::SendMessage(const RR_INTRUSIVE_PTR<Message>& m)
 {
 
+    m->ComputeSize();
     RR_SHARED_PTR<ITransportConnection> t;
     {
         boost::mutex::scoped_lock lock(TransportConnections_lock);
@@ -385,6 +397,7 @@ void IntraTransport::AsyncSendMessage(
     const RR_INTRUSIVE_PTR<Message>& m,
     const boost::function<void(const RR_SHARED_PTR<RobotRaconteurException>&)>& handler)
 {
+    m->ComputeSize();
     RR_SHARED_PTR<ITransportConnection> t;
     {
         boost::mutex::scoped_lock lock(TransportConnections_lock);
@@ -549,6 +562,14 @@ void IntraTransport::StartServer()
     is_server = true;
     Init();
     SendNodeDiscovery();
+    DiscoverAllNodes();
+}
+
+void IntraTransport::StartClient()
+{
+    is_server = false;
+    Init();
+    DiscoverAllNodes();
 }
 
 static void IntraTransport_NodeDetected1(RR_WEAK_PTR<RobotRaconteurNode> node, const NodeDiscoveryInfo& info)
@@ -739,7 +760,12 @@ void IntraTransportConnection::AsyncSendMessage(
     const RR_INTRUSIVE_PTR<Message>& m,
     const boost::function<void(const RR_SHARED_PTR<RobotRaconteurException>&)>& handler)
 {
-    RR_SHARED_PTR<IntraTransportConnection> peer1 = peer.lock();
+    RR_SHARED_PTR<IntraTransportConnection> peer1;
+    {
+        boost::mutex::scoped_lock lock(peer_lock);
+        peer1 = peer.lock();
+    }
+
     if (!peer1)
     {
         ROBOTRACONTEUR_LOG_TRACE_COMPONENT(node, Transport, m_LocalEndpoint, "Connection lost");
@@ -763,9 +789,13 @@ void IntraTransportConnection::SimpleAsyncEndSendMessage(const RR_SHARED_PTR<Rob
 
 void IntraTransportConnection::Close()
 {
-    RR_SHARED_PTR<IntraTransportConnection> peer1 = peer.lock();
-    peer.reset();
-    peer_storage.reset();
+    RR_SHARED_PTR<IntraTransportConnection> peer1;
+    {
+        boost::mutex::scoped_lock lock(peer_lock);
+        peer1 = peer.lock();
+        peer.reset();
+        peer_storage.reset();
+    }
 
     bool connected1 = connected.exchange(false);
 
@@ -823,7 +853,12 @@ RR_SHARED_PTR<RobotRaconteurNode> IntraTransportConnection::GetNode()
 
 void IntraTransportConnection::CheckConnection(uint32_t endpoint)
 {
-    RR_SHARED_PTR<IntraTransportConnection> peer1 = peer.lock();
+    RR_SHARED_PTR<IntraTransportConnection> peer1;
+    {
+        boost::mutex::scoped_lock lock(peer_lock);
+        peer1 = peer.lock();
+    }
+
     if (endpoint != m_LocalEndpoint || !connected.load() || !peer1)
     {
         ROBOTRACONTEUR_LOG_TRACE_COMPONENT(node, Transport, m_LocalEndpoint, "Connection lost");
@@ -839,12 +874,15 @@ bool IntraTransportConnection::CheckCapabilityActive(uint32_t flag)
 
 void IntraTransportConnection::SetPeer(const RR_SHARED_PTR<IntraTransportConnection>& peer)
 {
-    boost::unique_lock<boost::shared_mutex> lock(RemoteNodeID_lock);
-    this->peer = peer;
-    if (!server)
     {
-        this->peer_storage = peer;
+        boost::mutex::scoped_lock lock(peer_lock);
+        this->peer = peer;
+        if (!server)
+        {
+            this->peer_storage = peer;
+        }
     }
+    boost::unique_lock<boost::shared_mutex> lock(RemoteNodeID_lock);
     this->RemoteNodeID = peer->GetNode()->NodeID();
     this->m_RemoteEndpoint = peer->GetLocalEndpoint();
     connected.exchange(true);
@@ -854,9 +892,12 @@ void IntraTransportConnection::SetPeer(const RR_SHARED_PTR<IntraTransportConnect
 
 bool IntraTransportConnection::IsConnected()
 {
-    RR_SHARED_PTR<IntraTransportConnection> peer1 = peer.lock();
-    if (!peer1)
-        return false;
+    {
+        boost::mutex::scoped_lock lock(peer_lock);
+        RR_SHARED_PTR<IntraTransportConnection> peer1 = peer.lock();
+        if (!peer1)
+            return false;
+    }
     return connected.load();
 }
 
@@ -866,6 +907,58 @@ RR_SHARED_PTR<Transport> IntraTransportConnection::GetTransport()
     if (!p)
         throw InvalidOperationException("Transport has been released");
     return p;
+}
+
+void IntraTransport::DiscoverAllNodes()
+{
+    RR_SHARED_PTR<RobotRaconteurNode> node = this->node.lock();
+    if (!node)
+        return;
+
+    std::vector<NodeDiscoveryInfo> discovered_info;
+    {
+        boost::mutex::scoped_lock lock(peer_transports_lock);
+        for (std::list<RR_WEAK_PTR<IntraTransport> >::iterator ee = peer_transports.begin();
+             ee != peer_transports.end();)
+        {
+            RR_SHARED_PTR<IntraTransport> peer = ee->lock();
+            if (!peer)
+            {
+                ee = peer_transports.erase(ee);
+                continue;
+            }
+            ++ee;
+
+            if (!peer->IsServer())
+            {
+                continue;
+            }
+
+            NodeDiscoveryInfo n;
+            if (peer->TryGetNodeInfo(n.NodeID, n.NodeName, n.ServiceStateNonce))
+            {
+                NodeDiscoveryInfoURL u;
+                u.URL = "rr+intra:///?nodeid=" + n.NodeID.ToString("B") + "&service=RobotRaconteurServiceIndex";
+                u.LastAnnounceTime = boost::posix_time::microsec_clock::universal_time();
+                n.URLs.push_back(u);
+
+                discovered_info.push_back(n);
+            }
+        }
+    }
+
+    BOOST_FOREACH (NodeDiscoveryInfo n, discovered_info)
+    {
+        try
+        {
+            node->NodeDetected(n);
+        }
+        catch (std::exception& e)
+        {
+            ROBOTRACONTEUR_LOG_DEBUG_COMPONENT(node, Transport, 0,
+                                               "Error in IntraTransport NodeDetected: " << e.what());
+        }
+    }
 }
 
 } // namespace RobotRaconteur

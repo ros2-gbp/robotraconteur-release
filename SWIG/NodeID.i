@@ -19,6 +19,7 @@ class NodeID
 public:
 	NodeID();
 	virtual std::string ToString() const;
+	virtual std::string ToString(const std::string& format) const;
 	static NodeID NewUniqueID();
 	bool operator == (const NodeID &id2) const;
 	bool operator != (const NodeID &id2) const;
@@ -30,6 +31,7 @@ public:
 	
 	NodeID(boost::array<uint8_t,16> id);
 	NodeID(const std::string& id);
+	NodeID(const NodeID& id);
 
 	boost::array<uint8_t,16> ToByteArray();
 };
