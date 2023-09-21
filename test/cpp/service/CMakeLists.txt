@@ -31,7 +31,9 @@ rr_service_test_add_lib(
 
 rr_service_test_add_test(service SRC service_test.cpp ${RR_THUNK_SRCS})
 
-rr_service_test_add_test(single_thread_service SRC single_thread_test.cpp ${RR_THUNK_SRCS})
+if(NOT (WIN32 AND BUILD_SHARED_LIBS))
+    rr_service_test_add_test(single_thread_service SRC single_thread_test.cpp ${RR_THUNK_SRCS})
+endif()
 
 rr_service_test_add_test(service2 SRC service_test2.cpp ${RR_THUNK_SRCS})
 
@@ -61,9 +63,13 @@ rr_service_test_add_exe(serviceinfo2subscribertest SRC serviceinfo2subscribertes
 
 rr_service_test_add_exe(subscriberurltest SRC subscriberurltest.cpp)
 
-rr_service_test_add_test(discovery_loopback SRC discovery_loopback.cpp)
+if(NOT ROBOTRACONTEUR_TESTING_DISABLE_DISCOVERY_LOOPBACK)
+    rr_service_test_add_test(discovery_loopback SRC discovery_loopback.cpp)
+endif()
 
 rr_service_test_add_test(intra_loopback SRC intra_loopback.cpp)
+
+rr_service_test_add_test(websocket_loopback SRC websocket_loopback.cpp)
 
 rr_service_test_add_exe(
     certauthserver

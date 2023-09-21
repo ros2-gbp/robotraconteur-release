@@ -90,6 +90,8 @@ class ROBOTRACONTEUR_CORE_API IntraTransport : public Transport, public RR_ENABL
 
     RR_OVIRTUAL std::string GetUrlSchemeString() const RR_OVERRIDE;
 
+    RR_OVIRTUAL std::vector<std::string> GetServerListenUrls() RR_OVERRIDE;
+
     RR_OVIRTUAL void SendMessage(const RR_INTRUSIVE_PTR<Message>& m) RR_OVERRIDE;
 
     RR_OVIRTUAL void AsyncSendMessage(
@@ -111,6 +113,12 @@ class ROBOTRACONTEUR_CORE_API IntraTransport : public Transport, public RR_ENABL
      *
      */
     virtual void StartServer();
+
+    /**
+     * @brief Start the transport as a client
+     *
+     */
+    virtual void StartClient();
 
   protected:
     virtual void CloseTransportConnection_timed(const boost::system::error_code& err, const RR_SHARED_PTR<Endpoint>& e,
@@ -153,6 +161,8 @@ class ROBOTRACONTEUR_CORE_API IntraTransport : public Transport, public RR_ENABL
     RR_OVIRTUAL void LocalNodeServicesChanged() RR_OVERRIDE;
 
     void SendNodeDiscovery();
+
+    void DiscoverAllNodes();
 
   protected:
     virtual void register_transport(const RR_SHARED_PTR<ITransportConnection>& connection);
