@@ -874,7 +874,7 @@ class PipeEndpoint(object):
         :type timeout: float
         :return: The received packet
         """
-        m = self.__innerpipe.ReceivePacketWait(timeout)
+        m = self.__innerpipe.ReceivePacketWait(adjust_timeout(timeout))
         return UnpackMessageElement(m, self.__type, self.__obj, self.__innerpipe.GetNode())
 
     def PeekNextPacketWait(self, timeout=RobotRaconteurPython.RR_TIMEOUT_INFINITE):
@@ -886,7 +886,7 @@ class PipeEndpoint(object):
         :param timeout: Timeout in seconds to wait for a packet, or -1 for infinite
         :return: The received packet
         """
-        m = self.__innerpipe.PeekNextPacketWait(timeout)
+        m = self.__innerpipe.PeekNextPacketWait(adjust_timeout(timeout))
         return UnpackMessageElement(m, self.__type, self.__obj, self.__innerpipe.GetNode())
 
     def TryReceivePacketWait(self, timeout=RobotRaconteurPython.RR_TIMEOUT_INFINITE, peek=False):
@@ -907,7 +907,8 @@ class PipeEndpoint(object):
         :rtype: Tuple[bool,T]
         """
         m = RobotRaconteurPython.MessageElement()
-        r = self.__innerpipe.TryReceivePacketWait(m, timeout, peek)
+        r = self.__innerpipe.TryReceivePacketWait(
+            m, adjust_timeout(timeout), peek)
         return (r, UnpackMessageElement(m, self.__type, self.__obj, self.__innerpipe.GetNode()))
 
     @property
@@ -1400,7 +1401,7 @@ class WireConnection(object):
         :return: Value is valid
         :rtype: bool
         """
-        return self.__innerwire.WaitInValueValid(timeout)
+        return self.__innerwire.WaitInValueValid(adjust_timeout(timeout))
 
     def WaitOutValueValid(self, timeout=RobotRaconteurPython.RR_TIMEOUT_INFINITE):
         """
@@ -1414,7 +1415,7 @@ class WireConnection(object):
         :return: Value is valid
         :rtype: bool
         """
-        return self.__innerwire.WaitOutValueValid(timeout)
+        return self.__innerwire.WaitOutValueValid(adjust_timeout(timeout))
 
     @property
     def WireValueChanged(self):
@@ -3569,7 +3570,7 @@ class WireUnicastReceiver(object):
 
         :rtype: float
         """
-        t = self.__innerpipe.GetInValueLifespan()
+        t = self._innerpipe.GetInValueLifespan()
         if t < 0:
             return t
         return float(t) / 1000.0
@@ -3577,9 +3578,9 @@ class WireUnicastReceiver(object):
     @InValueLifespan.setter
     def InValueLifespan(self, secs):
         if secs < 0:
-            self.__innerpipe.SetInValueLifespan(-1)
+            self._innerpipe.SetInValueLifespan(-1)
         else:
-            self.__innerpipe.SetInValueLifespan(int(secs * 1000.0))
+            self._innerpipe.SetInValueLifespan(int(secs * 1000.0))
 
 
 class BroadcastDownsamplerStep(object):
@@ -3636,6 +3637,17 @@ class GeneratorClient(object):
             param1 = None
         ret1 = self._inner_gen.Next(param1)
         return self._unpack_return(ret1)
+
+    def TryNext(self, param=None):
+        if (self._param_type is not None and self._param_type.ContainerType == DataTypes_ContainerTypes_generator):
+            param1 = self._pack_param(param)
+        else:
+            assert param is None
+            param1 = None
+        gen_res = self._inner_gen.TryNext(param1)
+        if not gen_res.res:
+            return False, None
+        return True, self._unpack_return(gen_res.value)
 
     def AsyncNext(self, param, handler, timeout=RobotRaconteurPython.RR_TIMEOUT_INFINITE):
         if (self._param_type is not None and self._param_type.ContainerType == DataTypes_ContainerTypes_generator):
@@ -3876,7 +3888,7 @@ class ServiceSubscriptionClientID(object):
         """(str) The ServiceName of the connected service"""
 
         if (len(args) == 1):
-            self.NodeID = args[0].NodeID
+            self.NodeID = RobotRaconteurPython.NodeID(args[0].NodeID)
             self.ServiceName = args[0].ServiceName
         elif (len(args) == 2):
             self.NodeID = args[0]
@@ -3892,6 +3904,9 @@ class ServiceSubscriptionClientID(object):
 
     def __hash__(self):
         return hash((str(self.NodeID), self.ServiceName))
+
+    def __str__(self):
+        return str(self.NodeID) + "," + self.ServiceName
 
 
 class ServiceSubscriptionFilterNode(object):
@@ -3928,7 +3943,7 @@ class ServiceSubscriptionFilter(object):
     the filter before connecting.
     """
     __slots__ = ["Nodes", "ServiceNames",
-                 "TransportSchemes", "Predicate", "MaxConnections"]
+                 "TransportSchemes", "Predicate", "Attributes", "AttributesMatchOperation", "MaxConnections"]
 
     def __init__(self):
         self.Nodes = []
@@ -3937,6 +3952,11 @@ class ServiceSubscriptionFilter(object):
         """(List[str])  List of service names that should be connected. Empty means match any service name."""
         self.TransportSchemes = []
         """(List[str]) List of transport schemes. Empty means match any transport scheme."""
+        self.Attributes = dict()
+        """(Dict[str,RobotRaconteur.ServiceSubscriptionFilterAttributeGroup] Attributes to match)"""
+        self.AttributesMatchOperation = RobotRaconteurPython.ServiceSubscriptionFilterAttributeGroupOperation_AND
+        """(RobotRaconteur.ServiceSubscriptionFilterAttributeGroupOperation) The operation to use when matching attributes. 
+        Default is AND. Can be OR, AND, NOR, and NAND."""
         self.Predicate = None
         """(Callable[[RobotRaconteur.ServiceInfo2],bool]) A user specified predicate function. If nullptr, the predicate is not checked."""
         self.MaxConnections = 1000000
@@ -4452,6 +4472,35 @@ class ServiceSubscription(object):
         self._subscription.UpdateServiceURL(
             url, username, credentials, "", close_connected)
 
+    def UpdateServiceByType(self, service_types, filter_=None):
+        """
+        Update the service types and filter
+
+        :param service_types: The new service types to use to connect to service
+        :type service_types: Union[str,List[str]]
+        :param filter_: Optional filter to use to connect to service
+        :type filter_: Union[str,RobotRaconteurPython.ServiceSubscriptionFilter]
+        """
+
+        node = self._subscription.GetNode()
+        filter2 = _SubscribeService_LoadFilter(node, filter_)
+
+        service_types2 = RobotRaconteurPython.vectorstring()
+        if (sys.version_info > (3, 0)):
+            if (isinstance(service_types, str)):
+                service_types2.append(service_types)
+            else:
+                for s in service_types:
+                    service_types2.append(s)
+        else:
+            if (isinstance(service_types, (str, unicode))):
+                service_types2.append(service_types)
+            else:
+                for s in service_types:
+                    service_types2.append(s)
+
+        self._subscription.UpdateServiceByType(service_types2, filter2)
+
 
 class WrappedWireSubscriptionDirectorPython(RobotRaconteurPython.WrappedWireSubscriptionDirector):
     def __init__(self, subscription):
@@ -4862,7 +4911,10 @@ def _SubscribeService_LoadFilter(node, filter_):
             for s in filter_.TransportSchemes:
                 filter2.TransportSchemes.append(s)
         filter2.MaxConnections = filter_.MaxConnections
-
+        if (filter_.Attributes is not None):
+            for n, v in filter_.Attributes.items():
+                filter2.Attributes[n] = v
+        filter2.AttributesMatchOperation = filter_.AttributesMatchOperation
         if (filter_.Nodes is not None):
             nodes2 = RobotRaconteurPython.vectorptr_wrappedservicesubscriptionnode()
             for n1 in filter_.Nodes:
@@ -5060,8 +5112,7 @@ class RobotRaconteurNodeSetup(object):
     :type node: RobotRaconteur.RobotRaconteurNode
     :param argv: (optional) The command line argument vector. Default is ``sys.argv``
     """
-    __slots__ = ["__setup", "__node", "tcp_transport", "local_transport",
-                 "hardware_transport", "intra_transport", "command_line_config"]
+    __slots__ = ["__setup", "__node"]
 
     def __init__(self, node_name=None, tcp_port=None, flags=None, allowed_overrides=None, node=None, argv=None, config=None):
         if (config is not None):
@@ -5083,23 +5134,47 @@ class RobotRaconteurNodeSetup(object):
                 argv = sys.argv
             self.__setup = RobotRaconteurPython.WrappedRobotRaconteurNodeSetup(node, node_name, tcp_port, flags, allowed_overrides,
                                                                                RobotRaconteurPython.vectorstring(argv))
-        self.tcp_transport = self.__setup.GetTcpTransport()
-        """The TcpTransport, will be None if TcpTransport is not specified in flags"""
-        self.local_transport = self.__setup.GetLocalTransport()
-        """The LocalTransport, will be None if LocalTransport is not specified in flags"""
-        self.hardware_transport = self.__setup.GetHardwareTransport()
-        """The HardwareTransport, will be None if HardwareTransport is not specified in flags, Note: Hardware transport is not enabled by default"""
-        self.intra_transport = self.__setup.GetIntraTransport()
-        """The IntraTransport, will be None if IntraTransport is not specified in flags"""
-        self.command_line_config = self.__setup.GetCommandLineConfig()
-        """The command line config parser object used to configure node"""
         self.__node = node
+
+    @property
+    def tcp_transport(self):
+        """The TcpTransport, will be None if TcpTransport is not specified in flags"""
+        return self.__setup.GetTcpTransport()
+
+    @property
+    def local_transport(self):
+        """The LocalTransport, will be None if LocalTransport is not specified in flags"""
+        return self.__setup.GetLocalTransport()
+
+    @property
+    def hardware_transport(self):
+        """The HardwareTransport, will be None if HardwareTransport is not specified in flags, Note: Hardware transport is not enabled by default"""
+        return self.__setup.GetHardwareTransport()
+
+    @property
+    def intra_transport(self):
+        """The IntraTransport, will be None if IntraTransport is not specified in flags"""
+        return self.__setup.GetIntraTransport()
+
+    @property
+    def command_line_config(self):
+        """The command line config parser object used to configure node"""
+        return self.__setup.GetCommandLineConfig()
 
     def __enter__(self):
         return self
 
     def __exit__(self, etype, value, traceback):
-        self.__node.Shutdown()
+        self.close()
+
+    def close(self):
+        """Shutdown the node and release the node from lifecycle management"""
+        if self.__node is not None:
+            self.__node.Shutdown()
+            self.__node = None
+        if self.__setup is not None:
+            self.__setup.ReleaseNode()
+            self.__setup = None
 
     def ReleaseNode(self):
         """
@@ -5110,6 +5185,7 @@ class RobotRaconteurNodeSetup(object):
         """
         if self.__setup is None:
             return
+        self.__node = None
         self.__setup.ReleaseNode()
 
 
@@ -5306,7 +5382,7 @@ class SecureServerNodeSetup(RobotRaconteurNodeSetup):
 
     def __init__(self, node_name, tcp_port, node=None, argv=None):
         super(SecureServerNodeSetup, self).__init__(node_name, tcp_port, RobotRaconteurPython.RobotRaconteurNodeSetupFlags_SECURE_SERVER_DEFAULT,
-                                                    RobotRaconteurPython.RobotRaconteurNodeSetupFlags_SECURE_SERVER_DEFAULT_ALLOWED_OVVERIDE, node, argv)
+                                                    RobotRaconteurPython.RobotRaconteurNodeSetupFlags_SECURE_SERVER_DEFAULT_ALLOWED_OVERRIDE, node, argv)
 
 
 class UserLogRecordHandlerDirectorPython(RobotRaconteurPython.UserLogRecordHandlerDirector):
