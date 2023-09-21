@@ -1000,12 +1000,21 @@ class AsyncGeneratorClientReturnDirector
     virtual void handler(const boost::shared_ptr<WrappedGeneratorClient>& ret, HandlerErrorInfo& error) = 0;
 };
 
+class WrappedGeneratorClient_TryGetNextResult
+{
+  public:
+    RR_INTRUSIVE_PTR<MessageElement> value;
+    bool res;
+    WrappedGeneratorClient_TryGetNextResult() : res(false) {}
+};
+
 class WrappedGeneratorClient : public GeneratorClientBase
 {
   public:
     WrappedGeneratorClient(const std::string& name, int32_t id, const RR_SHARED_PTR<ServiceStub>& stub);
 
     RR_INTRUSIVE_PTR<MessageElement> Next(const RR_INTRUSIVE_PTR<MessageElement>& v);
+    WrappedGeneratorClient_TryGetNextResult TryNext(const RR_INTRUSIVE_PTR<MessageElement>& v);
     void AsyncNext(const RR_INTRUSIVE_PTR<MessageElement>& v, int32_t timeout, AsyncRequestDirector* handler,
                    int32_t id);
 
@@ -1834,11 +1843,15 @@ class WrappedServiceSubscriptionFilter
     std::vector<RR_SHARED_PTR<WrappedServiceSubscriptionFilterNode> > Nodes;
     std::vector<std::string> ServiceNames;
     std::vector<std::string> TransportSchemes;
+    std::map<std::string, ServiceSubscriptionFilterAttributeGroup> Attributes;
+    ServiceSubscriptionFilterAttributeGroupOperation AttributesMatchOperation;
     RR_SHARED_PTR<WrappedServiceSubscriptionFilterPredicateDirector> Predicate;
     void SetRRPredicateDirector(WrappedServiceSubscriptionFilterPredicateDirector* director, int32_t id);
     uint32_t MaxConnections;
 
-    WrappedServiceSubscriptionFilter() : MaxConnections(0) {}
+    WrappedServiceSubscriptionFilter()
+        : MaxConnections(0), AttributesMatchOperation(ServiceSubscriptionFilterAttributeGroupOperation_AND)
+    {}
 };
 
 class WrappedServiceInfo2Subscription;
@@ -1972,6 +1985,10 @@ class WrappedServiceSubscription : public RR_ENABLE_SHARED_FROM_THIS<WrappedServ
         const std::string& url, const std::string& username = "",
         const boost::intrusive_ptr<MessageElementData>& credentials = boost::intrusive_ptr<MessageElementData>(),
         const std::string& objecttype = "", bool close_connected = false);
+
+    void UpdateServiceByType(const std::vector<std::string>& service_types,
+                             const RR_SHARED_PTR<WrappedServiceSubscriptionFilter>& filter =
+                                 RR_SHARED_PTR<WrappedServiceSubscriptionFilter>());
 
   protected:
     RR_SHARED_PTR<ServiceSubscription> subscription;
@@ -2115,6 +2132,9 @@ RR_SHARED_PTR<WrappedServiceSubscription> WrappedSubscribeService(
     const RR_SHARED_PTR<RobotRaconteurNode>& node, const std::string& url, const std::string& username = "",
     const boost::intrusive_ptr<MessageElementData>& credentials = boost::intrusive_ptr<MessageElementData>(),
     const std::string& objecttype = "");
+
+static RR_SHARED_PTR<ServiceSubscriptionFilter> WrappedSubscribeService_LoadFilter(
+    const RR_SHARED_PTR<RobotRaconteurNode>& node, const RR_SHARED_PTR<WrappedServiceSubscriptionFilter>& filter);
 
 class UserLogRecordHandlerDirector
 {

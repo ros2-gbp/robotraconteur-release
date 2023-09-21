@@ -1975,6 +1975,22 @@ RR_INTRUSIVE_PTR<MessageElement> WrappedGeneratorClient::Next(const RR_INTRUSIVE
 {
     return NextBase(v);
 }
+
+WrappedGeneratorClient_TryGetNextResult WrappedGeneratorClient::TryNext(const RR_INTRUSIVE_PTR<MessageElement>& v)
+{
+    WrappedGeneratorClient_TryGetNextResult res;
+    try
+    {
+        res.res = true;
+        res.value = NextBase(v);
+    }
+    catch (StopIterationException&)
+    {
+        res.res = false;
+    }
+    return res;
+}
+
 void WrappedGeneratorClient::AsyncNext(const RR_INTRUSIVE_PTR<MessageElement>& v, int32_t timeout,
                                        AsyncRequestDirector* handler, int32_t id)
 {
@@ -4054,7 +4070,19 @@ void WrappedServiceSubscription::UpdateServiceURL(const std::vector<std::string>
 void WrappedServiceSubscription::UpdateServiceURL(const std::string& url, const std::string& username,
                                                   const boost::intrusive_ptr<MessageElementData>& credentials,
                                                   const std::string& objecttype, bool close_connected)
-{}
+{
+    std::vector<std::string> url2;
+    url2.push_back(url);
+    UpdateServiceURL(url2, username, credentials, objecttype, close_connected);
+}
+
+void WrappedServiceSubscription::UpdateServiceByType(const std::vector<std::string>& service_types,
+                                                     const RR_SHARED_PTR<WrappedServiceSubscriptionFilter>& filter)
+{
+    RR_SHARED_PTR<RobotRaconteurNode> node = GetNode();
+    RR_SHARED_PTR<ServiceSubscriptionFilter> filter2 = WrappedSubscribeService_LoadFilter(node, filter);
+    subscription->UpdateServiceByType(service_types, filter2);
+}
 
 WrappedWireSubscription::WrappedWireSubscription(const RR_SHARED_PTR<ServiceSubscription>& parent,
                                                  const std::string& membername, const std::string& servicepath)
@@ -4072,10 +4100,10 @@ WrappedService_typed_packet WrappedWireSubscription::GetInValue(TimeSpec* time)
         throw InvalidOperationException("Invalid subscription wire client");
     RR_SHARED_PTR<WrappedWireConnection> connection2 = rr_cast<WrappedWireConnection>(connection1);
     o.type = connection2->Type;
-    o.stub = connection2->GetStub();
     // TODO: Make this more efficient
     try
     {
+        o.stub = connection2->GetStub();
         o.context = o.stub->GetContext();
     }
     catch (InvalidOperationException&)
@@ -4099,11 +4127,11 @@ bool WrappedWireSubscription::TryGetInValue(WrappedService_typed_packet& val, Ti
         throw InvalidOperationException("Invalid subscription wire client");
     RR_SHARED_PTR<WrappedWireConnection> connection2 = rr_cast<WrappedWireConnection>(connection1);
     val.type = connection2->Type;
-    val.stub = connection2->GetStub();
 
     // TODO: Make this more efficient
     try
     {
+        val.stub = connection2->GetStub();
         val.context = val.stub->GetContext();
     }
     catch (InvalidOperationException&)
@@ -4127,10 +4155,10 @@ void WrappedWireSubscription::fire_WireValueChanged(const RR_INTRUSIVE_PTR<RRVal
     val.packet = RR_STATIC_POINTER_CAST<MessageElement>(value);
     RR_SHARED_PTR<WrappedWireConnection> connection2 = rr_cast<WrappedWireConnection>(connection);
     val.type = connection2->Type;
-    val.stub = connection2->GetStub();
     // TODO: Make this more efficient
     try
     {
+        val.stub = connection2->GetStub();
         val.context = val.stub->GetContext();
     }
     catch (InvalidOperationException&)
@@ -4196,7 +4224,7 @@ WrappedService_typed_packet WrappedPipeSubscription::ReceivePacket()
 }
 bool WrappedPipeSubscription::TryReceivePacket(WrappedService_typed_packet& packet)
 {
-    return TryReceivePacketWait(packet, -1, false);
+    return TryReceivePacketWait(packet, 0, false);
 }
 bool WrappedPipeSubscription::TryReceivePacketWait(WrappedService_typed_packet& packet, int32_t timeout, bool peek)
 {
@@ -4210,10 +4238,10 @@ bool WrappedPipeSubscription::TryReceivePacketWait(WrappedService_typed_packet& 
         throw InvalidOperationException("Invalid subscription pipe endpoint");
     RR_SHARED_PTR<WrappedPipeEndpoint> endpoint2 = rr_cast<WrappedPipeEndpoint>(endpoint1);
     packet.type = endpoint2->Type;
-    packet.stub = endpoint2->GetStub();
     // TODO: Make this more efficient
     try
     {
+        packet.stub = endpoint2->GetStub();
         packet.context = packet.stub->GetContext();
     }
     catch (InvalidOperationException&)
@@ -4304,6 +4332,8 @@ static RR_SHARED_PTR<ServiceSubscriptionFilter> WrappedSubscribeService_LoadFilt
         filter2 = RR_MAKE_SHARED<ServiceSubscriptionFilter>();
         filter2->ServiceNames = filter->ServiceNames;
         filter2->TransportSchemes = filter->TransportSchemes;
+        filter2->Attributes = filter->Attributes;
+        filter2->AttributesMatchOperation = filter->AttributesMatchOperation;
         filter2->MaxConnections = filter->MaxConnections;
         BOOST_FOREACH (RR_SHARED_PTR<WrappedServiceSubscriptionFilterNode>& n, filter->Nodes)
         {
