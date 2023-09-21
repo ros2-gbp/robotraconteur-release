@@ -25,8 +25,8 @@
 
 #ifndef ROBOTRACONTEUR_VERSION
 // Boost Style Version Number
-#define ROBOTRACONTEUR_VERSION 001600
-#define ROBOTRACONTEUR_VERSION_TEXT "0.16.0"
+#define ROBOTRACONTEUR_VERSION 001800
+#define ROBOTRACONTEUR_VERSION_TEXT "0.18.0"
 #endif
 
 #if (__GNUC__ == 4 && __GNUC_MINOR__ == 7)
@@ -150,7 +150,7 @@
 #define RR_MEMBER_ARRAY_INIT2(x)
 #endif
 
-#ifndef BOOST_NO_CXX11_OVERRIDE
+#if __cplusplus >= 201103L
 #define RR_OVERRIDE override
 #define RR_OVIRTUAL
 #else
