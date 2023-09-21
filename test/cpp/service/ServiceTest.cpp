@@ -1732,6 +1732,7 @@ void RobotRaconteurTest_testroot::set_struct1(const RR_INTRUSIVE_PTR<teststruct1
         -4.784915e+16, 1.490340e-18,  -4.343678e+08, -1.955643e+14};
     EXPECT_RRARRAY_EQ(s2->dat1, AttachRRArray(dat1a, 67, false));
     EXPECT_EQ(s2->str2, "Hello world 2!");
+    ASSERT_TRUE(s2->vec3);
     EXPECT_EQ(s2->vec3->size(), 4);
     thrower.Throw();
     EXPECT_EQ(RRArrayToString(s2->vec3->at(10)), "Hello Server!");
@@ -1739,11 +1740,13 @@ void RobotRaconteurTest_testroot::set_struct1(const RR_INTRUSIVE_PTR<teststruct1
     EXPECT_EQ(RRArrayToString(s2->vec3->at(46372)), "Test string!");
     EXPECT_EQ(RRArrayToString(s2->vec3->at(46373)), "Test string again");
 
+    ASSERT_TRUE(s2->dict4);
     EXPECT_EQ(s2->dict4->size(), 2);
     thrower.Throw();
     EXPECT_EQ(RRArrayToString(s2->dict4->at("cteststring1")), "Hello Server!");
     EXPECT_EQ(RRArrayToString(s2->dict4->at("cteststring2")), "Hello Server, again");
 
+    ASSERT_TRUE(s2->list5);
     EXPECT_EQ(s2->list5->size(), 2);
     thrower.Throw();
     EXPECT_EQ(RRArrayToString(s2->list5->front()), "Hello Server!");
@@ -2231,7 +2234,7 @@ void RobotRaconteurTest_testroot::set_list_d1(
     ThrowIfFailures thrower;
     EXPECT_TRUE(value);
     thrower.Throw();
-    EXPECT_NO_THROW(EXPECT_EQ(value->size(), 3));
+    EXPECT_NO_THROW(ASSERT_EQ(value->size(), 3));
     EXPECT_NO_THROW(EXPECT_EQ(RRArrayToScalar(value->front()), 4.074501e-07));
     EXPECT_NO_THROW(EXPECT_EQ(RRArrayToScalar(*(++value->begin())), -4.535303e+05));
     EXPECT_NO_THROW(EXPECT_EQ(RRArrayToScalar(*(++(++value->begin()))), -2.956241e-20));
@@ -2597,18 +2600,20 @@ void RobotRaconteurTest_testroot::set_nulltest(const RR_INTRUSIVE_PTR<teststruct
 
 void RobotRaconteurTest_testroot::func1()
 {
-    boost::thread(boost::bind(&RobotRaconteurTest_testroot::func1_thread, this));
+    RR_SHARED_PTR<Timer> t = ServerContext::GetCurrentServerContext()->GetNode()->CreateTimer(
+        boost::posix_time::milliseconds(100),
+        boost::bind(&RobotRaconteurTest_testroot::func1_thread, shared_from_this()), true);
+    t->Start();
 }
 
-void RobotRaconteurTest_testroot::func1_thread()
-{
-    boost::this_thread::sleep(boost::posix_time::milliseconds(100));
-    get_ev1()();
-}
+void RobotRaconteurTest_testroot::func1_thread() { get_ev1()(); }
 
 void RobotRaconteurTest_testroot::func2(double d1, double d2)
 {
-    boost::thread(boost::bind(&RobotRaconteurTest_testroot::func2_thread, this, d1, d2));
+    RR_SHARED_PTR<Timer> t = ServerContext::GetCurrentServerContext()->GetNode()->CreateTimer(
+        boost::posix_time::milliseconds(100),
+        boost::bind(&RobotRaconteurTest_testroot::func2_thread, shared_from_this(), d1, d2), true);
+    t->Start();
 }
 
 void RobotRaconteurTest_testroot::func2_thread(double d1, double d2)
@@ -2761,7 +2766,9 @@ void RobotRaconteurTest_testroot::p1_connect_callback(
 void RobotRaconteurTest_testroot::p1_packet_received(
     RR_SHARED_PTR<PipeEndpoint<RR_INTRUSIVE_PTR<RRArray<double> > > > p)
 {
-    boost::thread(boost::bind(&RobotRaconteurTest_testroot::p1_packet_received_threadfunc, this, p));
+    RR_SHARED_PTR<RobotRaconteurNode> node = ServerContext::GetCurrentServerContext()->GetNode();
+    RobotRaconteurNode::TryPostToThreadPool(
+        node, boost::bind(&RobotRaconteurTest_testroot::p1_packet_received_threadfunc, shared_from_this(), p));
 }
 
 void RobotRaconteurTest_testroot::p1_packet_received_threadfunc(
@@ -2817,7 +2824,9 @@ void RobotRaconteurTest_testroot::p2_connect_callback(RR_SHARED_PTR<PipeEndpoint
 
 void RobotRaconteurTest_testroot::p2_packet_received(RR_SHARED_PTR<PipeEndpoint<RR_INTRUSIVE_PTR<teststruct2> > > p)
 {
-    boost::thread(boost::bind(&RobotRaconteurTest_testroot::p2_packet_received_threadfunc, this, p));
+    RR_SHARED_PTR<RobotRaconteurNode> node = ServerContext::GetCurrentServerContext()->GetNode();
+    RobotRaconteurNode::TryPostToThreadPool(
+        node, boost::bind(&RobotRaconteurTest_testroot::p2_packet_received_threadfunc, shared_from_this(), p));
 }
 
 void RobotRaconteurTest_testroot::p2_packet_received_threadfunc(
