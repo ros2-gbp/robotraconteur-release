@@ -19,7 +19,7 @@ tracks:
     last_version: 1.0.0
     name: upstream
     patches: null
-    release_inc: '1'
+    release_inc: '2'
     release_repo_url: git@github.com:robotraconteur-packaging/robotraconteur-ros2-release.git
     release_tag: v1.0.0-ros2-humble
     ros_distro: humble
