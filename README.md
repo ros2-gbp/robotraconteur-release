@@ -1,3 +1,26 @@
+## robotraconteur (noetic) - 1.1.0-1
+
+The packages in the `robotraconteur` repository were released into the `noetic` distro by running `/usr/bin/bloom-release --rosdistro noetic --track noetic --edit robotraconteur` on `Thu, 14 Mar 2024 17:34:23 -0000`
+
+The `robotraconteur` package was released.
+
+Version of package(s) in repository `robotraconteur`:
+
+- upstream repository: https://github.com/robotraconteur/robotraconteur.git
+- release repository: https://github.com/robotraconteur-packaging/robotraconteur-ros-release.git
+- rosdistro version: `1.0.0-1`
+- old version: `1.0.0-1`
+- new version: `1.1.0-1`
+
+Versions of tools used:
+
+- bloom version: `0.11.2`
+- catkin_pkg version: `0.5.0`
+- rosdep version: `0.22.2`
+- rosdistro version: `0.9.0`
+- vcstools version: `0.1.42`
+
+
 ## robotraconteur (noetic) - 1.0.0-1
 
 The packages in the `robotraconteur` repository were released into the `noetic` distro by running `/usr/bin/bloom-release --rosdistro noetic --track noetic --edit robotraconteur` on `Mon, 01 Jan 2024 02:19:26 -0000`
