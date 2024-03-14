@@ -48,8 +48,8 @@ tracks:
     patches: null
     release_inc: '2'
     release_repo_url: git@github.com:robotraconteur-packaging/robotraconteur-ros2-release.git
-    release_tag: v1.0.0-ros2-iron
+    release_tag: v1.1.0-ros2-iron
     ros_distro: iron
     vcs_type: git
     vcs_uri: https://github.com/robotraconteur/robotraconteur.git
-    version: 1.0.0
+    version: 1.1.0
