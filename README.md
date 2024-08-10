@@ -1,3 +1,26 @@
+## robotraconteur (jazzy) - 1.2.2-1
+
+The packages in the `robotraconteur` repository were released into the `jazzy` distro by running `/usr/bin/bloom-release --rosdistro jazzy --track jazzy robotraconteur --edit` on `Sat, 10 Aug 2024 04:25:31 -0000`
+
+The `robotraconteur` package was released.
+
+Version of package(s) in repository `robotraconteur`:
+
+- upstream repository: https://github.com/robotraconteur/robotraconteur.git
+- release repository: unknown
+- rosdistro version: `null`
+- old version: `null`
+- new version: `1.2.2-1`
+
+Versions of tools used:
+
+- bloom version: `0.12.0`
+- catkin_pkg version: `0.5.0`
+- rosdep version: `0.24.0`
+- rosdistro version: `0.9.1`
+- vcstools version: `0.1.42`
+
+
 ## robotraconteur (iron) - 1.2.2-1
 
 The packages in the `robotraconteur` repository were released into the `iron` distro by running `/usr/bin/bloom-release --rosdistro iron --track iron robotraconteur --edit` on `Sat, 10 Aug 2024 04:22:23 -0000`
