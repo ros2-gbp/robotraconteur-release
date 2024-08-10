@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.5)
 
 # Read version
 
@@ -129,6 +129,8 @@ if(BUILD_PYTHON
 
     include(${CMAKE_SOURCE_DIR}/cmake/package_source_swig.cmake)
 endif()
+
+add_subdirectory(docs/getting_started)
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
