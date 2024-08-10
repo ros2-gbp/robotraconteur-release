@@ -16,6 +16,8 @@ Other packages are required to run the examples:
 
 ``sudo add-apt-repository ppa:robotraconteur/ppa`` ``sudo apt update``
 
+Newer versions of Ubuntu may use Python pip packages.
+
 Once the PPA is configured, install the Robot Raconteur packages:
 
 ``sudo apt install python-robotraconteur python3-robotraconteur``
@@ -76,7 +78,7 @@ Lists are ``list`` in Python.
 
 Enums are stored as ``int`` in Python.
 
-| 
+|
 
 .. container::
    :name: pythontypemap
@@ -86,8 +88,8 @@ Enums are stored as ``int`` in Python.
       ======================================================== ========================== ====================================================
       Robot Raconteur Type                                     Python Type                Notes
       ======================================================== ========================== ====================================================
-      double, single                                           ``float``                  
-      cdouble, csingle                                         ``complex``                
+      double, single                                           ``float``
+      cdouble, csingle                                         ``complex``
       int8, uint8, int16, uint16, int32, uint32, int64, uint64 ``int`` or ``long``        Depends on sys.maxint size
       double[]                                                 ``numpy.array``            ``numpy.array([1, 2, ...], dtype=numpy.float64)``
       single[]                                                 ``numpy.array``            ``numpy.array([1, 2, ...], dtype=numpy.float32)``
@@ -109,11 +111,11 @@ Enums are stored as ``int`` in Python.
       structure                                                *varies*                   See text for more info
       pods                                                     ``numpy.array``            See text for more info
       namedarrays                                              ``numpy.array``            See text for more info
-      enums                                                    ``int``                    
+      enums                                                    ``int``
       varvalue                                                 ``RobotRaconteurVarValue`` See text for more info
       ======================================================== ========================== ====================================================
 
-      
+
 
 Python Reference to Functions
 -----------------------------
@@ -132,7 +134,7 @@ accomplished using function references (also called function objecs depending on
 
    def hello2(name):
        print "Hello " + name
-       
+
    o=myobj()
    ref1=o.hello1
    ref2=hello2
