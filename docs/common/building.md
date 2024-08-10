@@ -2,7 +2,7 @@
 
   - [Building](#building)
     - [Windows](#windows)
-    - [Ubuntu Focal and Jammy](#ubuntu-focal)
+    - [Ubuntu Focal, Jammy, and Noble](#ubuntu-focal-jammy-and-noble)
     - [Ubuntu Bionic](#ubuntu-bionic)
     - [Mac OSX](#mac-osx)
     - [Swig](#swig)
@@ -16,7 +16,7 @@ The software is tested using GitHub Actions continuous integration. See .github/
 
 Building the core library requires Visual Studio 2012 through 2019, Boost 1.72.0, and CMake. Follow the instructions on the Boost website to build Boost. Alternatively, Boost can be built using the [vcpkg](https://github.com/Microsoft/vcpkg) utility.
 
-### Ubuntu Focal and Jammy
+### Ubuntu Focal, Jammy, and Noble
 Install the dependencies:
 
 ```
@@ -45,11 +45,11 @@ mkdir build && cd build
 cmake -DBUILD_GEN=ON -DBUILD_TEST=ON -DBoost_USE_STATIC_LIBS=OFF ..
 make
 ```
-    
+
 ### Mac OSX
 
 Robot Raconteur requires XCode, CMake, Boost Libraries, and OpenSSL.
- 
+
 Use homebrew to install boost and openssl:
 
 ```
@@ -57,7 +57,7 @@ brew install boost
 brew install openssl
 ```
 
-Note that homebrew does not create symlinks, so the CMake OPENSSL_ROOT_DIR must be set to the cellar folder. 
+Note that homebrew does not create symlinks, so the CMake OPENSSL_ROOT_DIR must be set to the cellar folder.
 
 Configure build for XCode using CMake GUI. Open resulting project file and build.
 
@@ -71,7 +71,7 @@ Mac OSX can install using
 
     brew install swig
 
-Ubuntu must build SWIG from source. See 
+Ubuntu must build SWIG from source. See
 https://github.com/swig/swig/wiki/Getting-Started for instructions.
 
 ### MATLAB Mex

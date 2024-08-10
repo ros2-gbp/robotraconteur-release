@@ -4,7 +4,6 @@ set(RobotRaconteur_DISABLE_MESSAGE4 FALSE CACHE BOOL "Disable Robot Raconteur me
 set(RobotRaconteur_DISABLE_STRINGTABLE FALSE CACHE BOOL "Disable Robot Raconteur string table by default")
 mark_as_advanced(RobotRaconteur_DISABLE_MESSAGE4 RobotRaconteur_DISABLE_STRINGTABLE)
 
-include(FindBoost)
 if(NOT EMSCRIPTEN)
     set(Boost_USE_MULTITHREADED ON)
     set(Boost_USE_STATIC_RUNTIME OFF CACHE BOOL "")
@@ -340,8 +339,8 @@ if(UNIX AND NOT APPLE AND NOT ANDROID)
         target_link_libraries(RobotRaconteurCore PRIVATE OpenSSL::SSL OpenSSL::Crypto pthread rt z dl)
         target_compile_definitions(RobotRaconteurCore PRIVATE ROBOTRACONTEUR_USE_OPENSSL)
     else()
-        target_include_directories(RobotRaconteurCore PUBLIC ${DBUS_INCLUDE_DIR} ${DBUS_INCLUDE_ARCH_DIR}
-                                                             ${LIBUSB_INCLUDE_DIR})
+        target_include_directories(RobotRaconteurCore PRIVATE ${DBUS_INCLUDE_DIR} ${DBUS_INCLUDE_ARCH_DIR}
+                                                              ${LIBUSB_INCLUDE_DIR})
         target_link_libraries(RobotRaconteurCore PUBLIC OpenSSL::SSL OpenSSL::Crypto pthread rt z dl)
         target_compile_definitions(RobotRaconteurCore PUBLIC ROBOTRACONTEUR_USE_OPENSSL)
     endif()
@@ -383,6 +382,14 @@ endif()
 if(DEFINED MSVC_VERSION)
     if(MSVC_VERSION GREATER_EQUAL 1900)
         set(ROBOTRACONTEUR_USE_CXX11 TRUE)
+    endif()
+endif()
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if(NOT CMAKE_CXX_STANDARD)
+        if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "6.1")
+            set(ROBOTRACONTEUR_USE_CXX11 TRUE)
+        endif()
     endif()
 endif()
 
