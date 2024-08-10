@@ -1,3 +1,26 @@
+## robotraconteur (iron) - 1.2.2-1
+
+The packages in the `robotraconteur` repository were released into the `iron` distro by running `/usr/bin/bloom-release --rosdistro iron --track iron robotraconteur --edit` on `Sat, 10 Aug 2024 04:22:23 -0000`
+
+The `robotraconteur` package was released.
+
+Version of package(s) in repository `robotraconteur`:
+
+- upstream repository: https://github.com/robotraconteur/robotraconteur.git
+- release repository: https://github.com/robotraconteur-packaging/robotraconteur-ros2-release.git
+- rosdistro version: `1.1.1-1`
+- old version: `1.1.1-1`
+- new version: `1.2.2-1`
+
+Versions of tools used:
+
+- bloom version: `0.12.0`
+- catkin_pkg version: `0.5.0`
+- rosdep version: `0.24.0`
+- rosdistro version: `0.9.1`
+- vcstools version: `0.1.42`
+
+
 ## robotraconteur (humble) - 1.2.2-1
 
 The packages in the `robotraconteur` repository were released into the `humble` distro by running `/usr/bin/bloom-release --rosdistro humble --track humble robotraconteur --edit` on `Sat, 10 Aug 2024 04:19:11 -0000`
