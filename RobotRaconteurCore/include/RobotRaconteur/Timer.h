@@ -151,8 +151,15 @@ class ROBOTRACONTEUR_CORE_API WallRate : public Rate
     boost::posix_time::ptime start_time;
     boost::posix_time::ptime last_time;
 
-#ifndef ROBOTRACONTEUR_EMSCRIPTEN
+#if !defined(ROBOTRACONTEUR_EMSCRIPTEN) && !defined(ROBOTRACONTEUR_WINDOWS)
     boost::asio::deadline_timer timer;
+#endif
+
+#ifdef ROBOTRACONTEUR_WINDOWS
+    boost::shared_ptr<void> timer_handle;
+#endif
+#ifdef ROBOTRACONTEUR_LINUX
+    timespec ts;
 #endif
 
   public:
@@ -221,5 +228,15 @@ using TimerPtr = RR_SHARED_PTR<Timer>;
 /** @brief Convenience alias for Rate shared_ptr */
 using RatePtr = RR_SHARED_PTR<Rate>;
 #endif
+
+/**
+ * @brief Sleep using high resolution timer provided by the OS
+ *
+ * Prefer to use RobotRaconteurNode::Sleep() instead which will use simulated time
+ * if active.
+ *
+ * @param duration The duration to sleep
+ */
+void HighResolutionSleep(const boost::posix_time::time_duration& duration);
 
 } // namespace RobotRaconteur
