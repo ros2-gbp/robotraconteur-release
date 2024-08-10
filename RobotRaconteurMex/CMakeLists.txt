@@ -14,7 +14,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs,ALL)
 endif()
 
-include(FindMatlab)
+# include(FindMatlab)
 find_package(Matlab COMPONENTS MX_LIBRARY REQUIRED)
 
 add_definitions(-DMATLAB_MEX_FILE -DMATLAB_DEFAULT_RELEASE=R2018a)
@@ -50,6 +50,7 @@ set(RR_MEX_M_DIRS
     @RobotRaconteurWireConnection
     @RobotRaconteurWireSubscription
     @RobotRaconteurPipeSubscription
+    @RobotRaconteurSubObjectSubscription
     @RobotRaconteurServiceSubscription
     @RobotRaconteurServiceInfo2Subscription
     @RobotRaconteurVarValue)
