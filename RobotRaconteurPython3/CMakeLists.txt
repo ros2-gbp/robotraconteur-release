@@ -9,15 +9,22 @@ find_path(NUMPY3_INCLUDE_NDARRAYOBJECT_DIR numpy/ndarrayobject.h PATHS ${PYTHON3
 if(NUMPY3_INCLUDE_NDARRAYOBJECT_DIR)
     set(NUMPY3_INCLUDE_DIR ${NUMPY3_INCLUDE_NDARRAYOBJECT_DIR})
 else()
-    execute_process(
-        COMMAND ${PYTHON3_EXECUTABLE} -c
-                "import numpy; import os; print(os.path.dirname(numpy.__file__) + '/core/include')"
-        RESULT_VARIABLE FIND_NUMPY3_RESULT OUTPUT_VARIABLE NUMPY3_INCLUDE_DIR)
-    string(STRIP "${NUMPY3_INCLUDE_DIR}" NUMPY3_INCLUDE_DIR)
+    execute_process(COMMAND ${PYTHON3_EXECUTABLE} -c "import numpy; import os; print(os.path.dirname(numpy.__file__))"
+                    RESULT_VARIABLE FIND_NUMPY3_RESULT OUTPUT_VARIABLE NUMPY3_INCLUDE_DIR1)
+    string(STRIP "${NUMPY3_INCLUDE_DIR1}" NUMPY3_INCLUDE_DIR1)
 
     if(${FIND_NUMPY3_RESULT})
         message(FATAL_ERROR "Could not determine NumPy include directory")
     endif()
+
+    if(EXISTS "${NUMPY3_INCLUDE_DIR1}/core/include/numpy/ndarrayobject.h")
+        set(NUMPY3_INCLUDE_DIR "${NUMPY3_INCLUDE_DIR1}/core/include")
+    else()
+        if(EXISTS "${NUMPY3_INCLUDE_DIR1}/_core/include/numpy/ndarrayobject.h")
+            set(NUMPY3_INCLUDE_DIR "${NUMPY3_INCLUDE_DIR1}/_core/include")
+        endif()
+    endif()
+
 endif()
 
 if(NOT EXISTS "${NUMPY3_INCLUDE_DIR}/numpy/ndarrayobject.h")
@@ -119,9 +126,13 @@ if(NOT EMSCRIPTEN)
     configure_file("${PYTHON2_SOURCE_DIR}/setup.py.in" "${CMAKE_BINARY_DIR}/out/Python3/setup.py" @ONLY)
     configure_file("${PYTHON2_SOURCE_DIR}/setup.py.in" "${CMAKE_BINARY_DIR}/out_debug/Python3/setup.py" @ONLY)
     configure_file("${PYTHON2_SOURCE_DIR}/setup.py.in" "${CMAKE_BINARY_DIR}/out_reldebug/Python3/setup.py" @ONLY)
+    configure_file("${PYTHON2_SOURCE_DIR}/README.md" "${CMAKE_BINARY_DIR}/out/Python3/README.md" @ONLY)
+    configure_file("${PYTHON2_SOURCE_DIR}/README.md" "${CMAKE_BINARY_DIR}/out_debug/Python3/README.md" @ONLY)
+    configure_file("${PYTHON2_SOURCE_DIR}/README.md" "${CMAKE_BINARY_DIR}/out_reldebug/Python3/README.md" @ONLY)
 else()
     set(ROBOTRACONTEUR_PYTHON3_SETUPPY_EXTRA "package_dir={'RobotRaconteur': 'out/Python3/RobotRaconteur'},")
     configure_file("${PYTHON2_SOURCE_DIR}/setup.py.in" "${CMAKE_SOURCE_DIR}/setup.py" @ONLY)
+    configure_file("${PYTHON2_SOURCE_DIR}/README.md" "${CMAKE_SOURCE_DIR}/README.md" @ONLY)
 endif()
 
 include("${PYTHON2_SOURCE_DIR}/PythonExceptions.cmake")
