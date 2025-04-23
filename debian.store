@@ -1,1 +1,1 @@
-{"base": "3633e68", "parent": "debian/rolling/robotraconteur", "previous": "13e7691", "trim": "", "trimbase": ""}
+{"base": "6c7170a4a5e9", "parent": "debian/kilted/robotraconteur", "previous": "6a9aafee487e", "trim": "", "trimbase": ""}
