@@ -1,3 +1,26 @@
+## robotraconteur (kilted) - 1.2.6-1
+
+The packages in the `robotraconteur` repository were released into the `kilted` distro by running `/usr/bin/bloom-release --rosdistro kilted --track kilted --edit robotraconteur` on `Mon, 01 Sep 2025 19:41:37 -0000`
+
+The `robotraconteur` package was released.
+
+Version of package(s) in repository `robotraconteur`:
+
+- upstream repository: https://github.com/robotraconteur/robotraconteur.git
+- release repository: https://github.com/ros2-gbp/robotraconteur-release.git
+- rosdistro version: `1.2.2-2`
+- old version: `1.2.5-1`
+- new version: `1.2.6-1`
+
+Versions of tools used:
+
+- bloom version: `0.13.0`
+- catkin_pkg version: `1.0.0`
+- rosdep version: `0.26.0`
+- rosdistro version: `1.0.1`
+- vcstools version: `0.1.42`
+
+
 ## robotraconteur (jazzy) - 1.2.6-1
 
 The packages in the `robotraconteur` repository were released into the `jazzy` distro by running `/usr/bin/bloom-release --rosdistro jazzy --track jazzy --edit robotraconteur` on `Mon, 01 Sep 2025 19:38:49 -0000`
