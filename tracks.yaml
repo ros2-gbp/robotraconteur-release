@@ -129,8 +129,8 @@ tracks:
     patches: null
     release_inc: '1'
     release_repo_url: git@github.com:ros2-gbp/robotraconteur-release.git
-    release_tag: v1.2.5-ros
+    release_tag: v1.2.6-ros
     ros_distro: rolling
     vcs_type: git
     vcs_uri: https://github.com/robotraconteur/robotraconteur.git
-    version: 1.2.5
+    version: 1.2.6
