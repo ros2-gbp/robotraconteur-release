@@ -26,6 +26,10 @@
 #include <boost/foreach.hpp>
 #include <boost/range.hpp>
 #include <boost/range/algorithm.hpp>
+#include <boost/bind/bind.hpp>
+#include <boost/bind/placeholders.hpp>
+
+// cSpell: ignore ecount, datin, rdat, sdat
 
 namespace RobotRaconteur
 {
@@ -84,7 +88,6 @@ void Message::Write(ArrayBinaryWriter& w)
     }
 
     w.PopLimit();
-    // if (w.DistanceFromLimit()!=0) throw ProtocolException("Error in message format");
 }
 
 void Message::Read(ArrayBinaryReader& r)
@@ -140,7 +143,6 @@ void Message::Write4(ArrayBinaryWriter& w)
     }
 
     w.PopLimit();
-    // if (w.DistanceFromLimit()!=0) throw ProtocolException("Error in message format");
 }
 
 void Message::Read4(ArrayBinaryReader& r)
@@ -241,7 +243,7 @@ void MessageHeader::Read(ArrayBinaryReader& r)
     MessageSize = r.ReadNumber<uint32_t>();
     uint16_t version = r.ReadNumber<uint16_t>();
     if (version != 2)
-        throw ProtocolException("Uknown protocol version");
+        throw ProtocolException("Unknown protocol version");
 
     HeaderSize = r.ReadNumber<uint16_t>();
 
@@ -968,7 +970,7 @@ void MessageEntry::Read4(ArrayBinaryReader& r)
 
     elements = std::vector<RR_INTRUSIVE_PTR<MessageElement> >();
     elements.reserve(ecount);
-    for (int32_t i = 0; i < ecount; i++)
+    for (uint32_t i = 0; i < ecount; i++)
     {
         RR_INTRUSIVE_PTR<MessageElement> e = CreateMessageElement();
         e->Read4(r);
@@ -1008,7 +1010,6 @@ MessageElement::MessageElement(MessageStringRef name, const RR_INTRUSIVE_PTR<Mes
 
     ElementName = name;
     SetData(datin);
-    // UpdateData();
 }
 
 RR_INTRUSIVE_PTR<MessageElementData> MessageElement::GetData() { return dat; }
@@ -1027,7 +1028,6 @@ void MessageElement::SetData(const RR_INTRUSIVE_PTR<MessageElementData>& value)
     }
 
     ElementSize = std::numeric_limits<uint32_t>::max();
-    // UpdateData();
 }
 
 uint32_t MessageElement::ComputeSize()
@@ -1457,23 +1457,6 @@ void MessageElement::UpdateData4()
     default:
         throw DataTypeException("Unknown data type");
     }
-
-    // TODO: string table here
-
-    /*if (ElementName.size() > 0)
-    {
-        ElementFlags |= MessageElementFlags_ELEMENT_NAME_STR;
-    }
-    else
-    {
-        ElementFlags &= ~MessageElementFlags_ELEMENT_NAME_STR;
-    }
-    if (ElementNameCode != 0)
-    {
-        throw NotImplementedException("Not implemented");
-    }
-    ElementFlags &= ~MessageElementFlags_ELEMENT_NAME_CODE;
-    */
 
     if ((ElementFlags & (MessageElementFlags_ELEMENT_NAME_STR | MessageElementFlags_ELEMENT_NAME_CODE)) &&
         (ElementFlags & MessageElementFlags_ELEMENT_NUMBER))

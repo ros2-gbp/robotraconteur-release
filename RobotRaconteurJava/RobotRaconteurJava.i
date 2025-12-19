@@ -4,6 +4,7 @@
 
 %{
 #if defined(__clang__)
+// cSpell: disable-next-line
 #pragma clang diagnostic ignored "-Wunused-function"
 #endif
 
@@ -67,6 +68,10 @@
 
 %rename("%(regex:/^(RobotRaconteur_LogLevel)_(.*)/LogLevel_\\2/)s", %$isenumitem) "";
 %rename("%(regex:/^(RobotRaconteur_LogComponent)_(.*)/LogComponent_\\2/)s", %$isenumitem) "";
+
+%ignore "RR_TIMEOUT_INFINITE";
+%ignore "RR_VALUE_LIFESPAN_INFINITE";
+
 %include "RobotRaconteurConstants.i"
 
 %include "JavaTypemaps.i"
@@ -102,7 +107,7 @@
 %include "ServiceDefinitionJava.i"
 %include "NodeIDJava.i"
 
-#define RR_MESSAEGE_ELEMENT_DATA_UTIL_EXTRAS
+#define RR_MESSAGE_ELEMENT_DATA_UTIL_EXTRAS
 %include "MessageJava.i"
 
 %include "AsyncHandlerDirector.i"

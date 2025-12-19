@@ -42,7 +42,6 @@ ROBOTRACONTEUR_CORE_API std::string RRArrayToString(const RR_INTRUSIVE_PTR<RRArr
         throw DataTypeException("Null pointer");
     }
     size_t s = arr->size();
-    // char* str=new char[arr->Length()+1];
 
     return std::string(arr->data(), s);
 }
@@ -251,7 +250,6 @@ ROBOTRACONTEUR_CORE_API size_t RRArrayElementSize(DataTypes type)
         throw DataTypeException("Invalid data type");
     }
     throw DataTypeException("Invalid data type");
-    // return 0;
 }
 
 TimeSpec::TimeSpec()
@@ -362,6 +360,7 @@ MultiDimArray_CalculateCopyIndicesIter::~MultiDimArray_CalculateCopyIndicesIter(
 class MultiDimArray_CalculateCopyIndicesIterImpl : public MultiDimArray_CalculateCopyIndicesIter
 {
   protected:
+    // cSpell: ignore stridea, strideb, mema_dims, memb_dims, mema_pos, memb_pos
     std::vector<uint32_t> mema_dims;
     std::vector<uint32_t> memb_dims;
     std::vector<uint32_t> mema_pos;
@@ -387,7 +386,7 @@ class MultiDimArray_CalculateCopyIndicesIterImpl : public MultiDimArray_Calculat
         if (count.empty())
             throw InvalidArgumentException("MultiDimArray count invalid");
 
-        if (count.size() > mema_dims.size() || count.size() > memb_dims.size())
+        if (count.size() > mema_dims.size() || count.size() > mema_dims.size())
             throw InvalidArgumentException("MultiDimArray copy count invalid");
         if (count.size() > memb_dims.size() || count.size() > memb_dims.size())
             throw InvalidArgumentException("MultiDimArray copy count invalid");
@@ -453,9 +452,6 @@ class MultiDimArray_CalculateCopyIndicesIterImpl : public MultiDimArray_Calculat
         {
             return false;
         }
-
-        int a = 0;
-        int b = 0;
 
         indexa = 0;
         for (uint32_t j = 0; j < boost::numeric_cast<uint32_t>(count.size()); j++)
@@ -566,7 +562,6 @@ ROBOTRACONTEUR_CORE_API std::string decode_index(boost::string_ref index)
             out.put((char)v);
         }
     }
-    // std::cout << "decode: " << out.str() << out.str().length() << std::endl;
 
     return out.str();
 }
@@ -592,7 +587,7 @@ RR_INTRUSIVE_PTR<RRList<RRArray<char> > > stringVectorToRRList(const std::vector
 
 std::vector<std::string> RRListToStringVector(const RR_INTRUSIVE_PTR<RRList<RRArray<char> > >& list)
 {
-    rr_null_check(list, "Unexected null string list");
+    rr_null_check(list, "Unexpected null string list");
     std::vector<std::string> o;
     BOOST_FOREACH (const RR_INTRUSIVE_PTR<RRArray<char> >& e, *list)
     {
