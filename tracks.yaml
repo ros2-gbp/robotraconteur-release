@@ -75,11 +75,11 @@ tracks:
     patches: null
     release_inc: '1'
     release_repo_url: git@github.com:ros2-gbp/robotraconteur-release.git
-    release_tag: v1.2.6-ros
+    release_tag: v1.2.7-ros
     ros_distro: jazzy
     vcs_type: git
     vcs_uri: https://github.com/robotraconteur/robotraconteur.git
-    version: 1.2.6
+    version: 1.2.7
   kilted:
     actions:
     - bloom-export-upstream :{vcs_local_uri} :{vcs_type} --tag :{release_tag} --display-uri
