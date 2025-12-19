@@ -11,7 +11,6 @@ if(NOT EMSCRIPTEN)
         Boost
         COMPONENTS date_time
                    filesystem
-                   system
                    regex
                    chrono
                    atomic
@@ -20,16 +19,7 @@ if(NOT EMSCRIPTEN)
                    program_options
         REQUIRED)
 else()
-    find_package(
-        Boost
-        COMPONENTS date_time
-                   filesystem
-                   system
-                   regex
-                   chrono
-                   random
-                   program_options
-        REQUIRED)
+    find_package(Boost COMPONENTS date_time filesystem regex chrono random program_options REQUIRED)
 endif()
 
 if(WIN32 AND ROBOTRACONTEUR_USE_OPENSSL)
@@ -261,7 +251,6 @@ if(NOT EMSCRIPTEN)
                Boost::disable_autolinking
                Boost::date_time
                Boost::filesystem
-               Boost::system
                Boost::regex
                Boost::chrono
                Boost::atomic
@@ -275,7 +264,6 @@ else()
                Boost::disable_autolinking
                Boost::date_time
                Boost::filesystem
-               Boost::system
                Boost::regex
                Boost::chrono
                Boost::random
@@ -303,6 +291,7 @@ if(WIN32)
                     OpenSSL::Crypto)
         target_compile_definitions(RobotRaconteurCore PRIVATE ROBOTRACONTEUR_USE_OPENSSL)
     else()
+        # cSpell: disable
         target_link_libraries(
             RobotRaconteurCore
             PRIVATE Mswsock.lib
@@ -313,6 +302,7 @@ if(WIN32)
                     Secur32.lib
                     Bcrypt.lib)
         target_compile_definitions(RobotRaconteurCore PRIVATE ROBOTRACONTEUR_USE_SCHANNEL)
+        # cSpell: enable
     endif()
 
     if(CMAKE_COMPILER_IS_GNUCXX)
@@ -336,12 +326,12 @@ if(UNIX AND NOT APPLE AND NOT ANDROID)
 
         target_include_directories(RobotRaconteurCore PRIVATE ${DBUS_INCLUDE_DIR} ${DBUS_INCLUDE_ARCH_DIR}
                                                               ${LIBUSB_INCLUDE_DIR})
-        target_link_libraries(RobotRaconteurCore PRIVATE OpenSSL::SSL OpenSSL::Crypto pthread rt z dl)
+        target_link_libraries(RobotRaconteurCore PRIVATE OpenSSL::SSL OpenSSL::Crypto ${CMAKE_DL_LIBS})
         target_compile_definitions(RobotRaconteurCore PRIVATE ROBOTRACONTEUR_USE_OPENSSL)
     else()
         target_include_directories(RobotRaconteurCore PRIVATE ${DBUS_INCLUDE_DIR} ${DBUS_INCLUDE_ARCH_DIR}
                                                               ${LIBUSB_INCLUDE_DIR})
-        target_link_libraries(RobotRaconteurCore PUBLIC OpenSSL::SSL OpenSSL::Crypto pthread rt z dl)
+        target_link_libraries(RobotRaconteurCore PUBLIC OpenSSL::SSL OpenSSL::Crypto ${CMAKE_DL_LIBS})
         target_compile_definitions(RobotRaconteurCore PUBLIC ROBOTRACONTEUR_USE_OPENSSL)
     endif()
 
@@ -393,6 +383,10 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif()
 endif()
 
+if(EMSCRIPTEN)
+    set(ROBOTRACONTEUR_USE_CXX11 TRUE)
+endif()
+
 if(NOT ROBOTRACONTEUR_USE_CXX11)
     target_compile_definitions(RobotRaconteurCore PUBLIC ROBOTRACONTEUR_NO_CXX11)
 endif()
@@ -406,6 +400,16 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.16.0")
     target_precompile_headers(RobotRaconteurCore PRIVATE ${RobotRaconteurCore_header})
     set_source_files_properties(src/LocalTransport.cpp PROPERTIES SKIP_PRECOMPILE_HEADERS TRUE)
     set_source_files_properties(src/Tap.cpp PROPERTIES SKIP_PRECOMPILE_HEADERS TRUE)
+endif()
+
+option(ROBOTRACONTEURCORE_SOVERSION_MAJOR_ONLY "Only include major version in SOVERSION" OFF)
+if(ROBOTRACONTEURCORE_SOVERSION_MAJOR_ONLY)
+    set_target_properties(RobotRaconteurCore PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
+endif()
+
+option(ROBOTRACONTEUR_SKIP_RPATH "Skip RPATH for shared libraries" OFF)
+if(ROBOTRACONTEUR_SKIP_RPATH)
+    set_target_properties(RobotRaconteurCore PROPERTIES SKIP_BUILD_RPATH TRUE)
 endif()
 
 file(COPY "${CMAKE_SOURCE_DIR}/RobotRaconteurCore/include" DESTINATION "${CMAKE_BINARY_DIR}/out/")

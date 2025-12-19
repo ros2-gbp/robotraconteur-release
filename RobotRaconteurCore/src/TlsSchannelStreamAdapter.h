@@ -22,9 +22,6 @@
 #endif
 #endif
 
-//#undef ROBOTRACONTEUR_USE_SCHANNEL
-//#define ROBOTRACONTEUR_USE_OPENSSL
-
 #ifdef ROBOTRACONTEUR_USE_SCHANNEL
 #define SECURITY_WIN32
 #endif
@@ -32,7 +29,7 @@
 #include <string>
 #include <vector>
 #include <boost/bind/placeholders.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/thread.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
@@ -49,7 +46,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <wincrypt.h>
-//#include <wintrust.h>
 #include <schannel.h>
 #include <security.h>
 #include <sspi.h>
@@ -68,7 +64,7 @@ class TlsSchannelAsyncStreamAdapterContext : boost::noncopyable
 {
   private:
 #ifdef ROBOTRACONTEUR_USE_SCHANNEL
-
+    // cSpell: disable
     HCERTSTORE activestore;
     PCCERT_CONTEXT activecertificate;
     CredHandle server_credentials;
@@ -79,7 +75,7 @@ class TlsSchannelAsyncStreamAdapterContext : boost::noncopyable
     PCCERT_CONTEXT rootcertificate2020;
     bool use_root_cert_2015;
     bool use_root_cert_2020;
-
+// cSpell: enable
 #endif
     boost::mutex mylock;
     NodeID nodeid;
@@ -108,7 +104,7 @@ class TlsSchannelAsyncStreamAdapterContext : boost::noncopyable
 
 class TlsSchannelAsyncStreamAdapter;
 
-// This class is necessary due to the infurating behavior of ASIO templates
+// This class is necessary due to the infuriating behavior of ASIO templates
 class TlsSchannelAsyncStreamAdapter_ASIO_adapter
 {
     TlsSchannelAsyncStreamAdapter& next_layer_;
@@ -121,9 +117,6 @@ class TlsSchannelAsyncStreamAdapter_ASIO_adapter
 
         void do_complete(const boost::system::error_code& ec, const std::size_t& bytes_transferred)
         {
-            // boost::asio::detail::binder2<Handler, boost::system::error_code, std::size_t>
-            // handler1(handler_, ec, bytes_transferred);
-            // boost_asio_handler_invoke_helpers::invoke(handler1, handler1.handler_);
 
             handler_(ec, bytes_transferred);
         }
@@ -140,8 +133,7 @@ class TlsSchannelAsyncStreamAdapter_ASIO_adapter
     {
 
         // TODO: Don't allocate here
-        boost::shared_ptr<handler_wrapper<Handler> > handler2 =
-            boost::make_shared<handler_wrapper<Handler> >(boost::ref(handler));
+        boost::shared_ptr<handler_wrapper<Handler> > handler2 = boost::make_shared<handler_wrapper<Handler> >(handler);
 
         // TODO: use more than just first buffer
         mutable_buffers b;
@@ -220,7 +212,6 @@ class TlsSchannelAsyncStreamAdapter : public boost::enable_shared_from_this<TlsS
     uint32_t send_buffer_end_pos;
     uint32_t recv_buffer_end_pos;
     uint32_t send_buffer_transfer_pos;
-    // uint32_t recv_buffer_transfer_pos;
 
     bool reading;
     bool writing;
@@ -248,6 +239,7 @@ class TlsSchannelAsyncStreamAdapter : public boost::enable_shared_from_this<TlsS
     static void release_context(PCtxtHandle phContext);
     static void release_credentials(PCredHandle phContext);
 
+    // cSpell: ignore doread
     void do_handshake1(const boost::system::error_code& error, size_t bytes_transferred,
                        boost::function<void(const boost::system::error_code&)> handler);
     void do_handshake2(const boost::system::error_code& error, size_t bytes_transferred,

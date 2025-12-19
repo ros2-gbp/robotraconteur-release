@@ -20,6 +20,9 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-cstyle-cast,cppcoreguidelines-avoid-c-arrays)
 
+// cSpell: ignore mxobj, skelid, servicesubscriptionid, wiresubscriptionid, pipesubscriptionid, mexobjecttype
+// cSpell: ignore subobjectsubscriptionid, skelscount
+
 using namespace RobotRaconteur;
 
 enum RobotRaconteurMexObjectTypes
@@ -198,12 +201,7 @@ class MexServiceStub : public virtual RobotRaconteur::ServiceStub
     RR_OVIRTUAL void DispatchEvent(const RR_INTRUSIVE_PTR<MessageEntry>& m) RR_OVERRIDE;
     RR_OVIRTUAL void DispatchPipeMessage(const RR_INTRUSIVE_PTR<MessageEntry>& m) RR_OVERRIDE;
     RR_OVIRTUAL void DispatchWireMessage(const RR_INTRUSIVE_PTR<MessageEntry>& m) RR_OVERRIDE;
-    /*virtual RR_INTRUSIVE_PTR<MessageEntry> CallbackCall(const RR_INTRUSIVE_PTR<MessageEntry>& m);
-    virtual RR_SHARED_PTR<RobotRaconteur::MexPipeClient> GetPipe(const std::string& membername);
-    virtual RR_SHARED_PTR<RobotRaconteur::MexWireClient> GetWire(const std::string& membername);
-    virtual RR_SHARED_PTR<RobotRaconteur::ArrayMemoryBase> GetArrayMemory(const std::string& membername);
-    virtual RR_SHARED_PTR<RobotRaconteur::MultiDimArrayMemoryBase> GetMultiDimArrayMemory(const std::string&
-    membername);*/
+
     RR_OVIRTUAL void RRClose() RR_OVERRIDE;
     RR_OVIRTUAL void RRInitStub() RR_OVERRIDE;
 
