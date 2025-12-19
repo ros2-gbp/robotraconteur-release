@@ -1,4 +1,8 @@
-cmake_minimum_required(VERSION 3.5)
+if((CMAKE_VERSION VERSION_GREATER 3.12 OR CMAKE_VERSION VERSION_EQUAL 3.12))
+    cmake_minimum_required(VERSION 3.12...3.31)
+else()
+    cmake_minimum_required(VERSION 3.5)
+endif()
 
 # Read version
 
@@ -43,7 +47,7 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/rrversion.txt.in ${CMAKE_BINARY_DIR}/rr
 include(GNUInstallDirs)
 
 find_package(Doxygen)
-option(BUILD_DOCUMENTATION "Build documentation using Doxygen" ${DOXYGEN_FOUND})
+option(BUILD_DOCUMENTATION "Build documentation using Doxygen" OFF)
 
 if(APPLE)
     set(CMAKE_CXX_STANDARD 11)
@@ -133,17 +137,19 @@ endif()
 add_subdirectory(docs/getting_started)
 
 include(CMakePackageConfigHelpers)
-configure_package_config_file(
-    "cmake/Config.cmake.in" "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake"
-    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}"
-    PATH_VARS CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_INCLUDEDIR CMAKE_INSTALL_BINDIR)
-write_basic_package_version_file("${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake"
-                                 VERSION ${ROBOTRACONTEUR_VERSION} COMPATIBILITY AnyNewerVersion)
+if(BUILD_CORE)
+    configure_package_config_file(
+        "cmake/Config.cmake.in" "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake"
+        INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}"
+        PATH_VARS CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_INCLUDEDIR CMAKE_INSTALL_BINDIR)
+    write_basic_package_version_file("${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake"
+                                     VERSION ${ROBOTRACONTEUR_VERSION} COMPATIBILITY AnyNewerVersion)
 
-install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME})
-install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME})
+    install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME})
+    install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME})
+endif()
 
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/\.git/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/\.vs/")

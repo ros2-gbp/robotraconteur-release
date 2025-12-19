@@ -18,6 +18,8 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/numeric.hpp>
 
+// cSpell: ignore rrutil, rrstructtype, NDIM, XINCREF, destrrarray
+
 namespace RobotRaconteur
 {
 template <typename T>
@@ -180,16 +182,10 @@ PyObject* GetStructureType(const std::string& type, const boost::shared_ptr<Robo
         throw InternalErrorException("Could not load RobotRaconteurPython module");
     }
 
-    /*PyObject* rrpy_module=PyDict_GetItemString(modules_dict, "RobotRaconteur.RobotRaconteurPython");
-    if (rrpy_module==NULL)
-    {
-    throw InternalErrorException("Could not load RobotRaconeturPython module");
-    }*/
-
     PyObject* rrutil_module = PyDict_GetItemString(modules_dict, "RobotRaconteur.RobotRaconteurPythonUtil");
     if (rrutil_module == NULL)
     {
-        throw InternalErrorException("Could not load RobotRaconeturPythonUtil module");
+        throw InternalErrorException("Could not load RobotRaconteurPythonUtil module");
     }
 
     if (!node)
@@ -224,13 +220,13 @@ PyObject* GetStructureType(const std::string& type, const boost::shared_ptr<Robo
     PyAutoPtr<PyObject> new_struct_type_func(PyObject_GetAttrString(rrutil_module, "CreateStructureType"));
     if (new_struct_type_func.get() == NULL)
     {
-        throw InternalErrorException("Could not load RobotRaconeturPythonUtil.CreateStructureType function");
+        throw InternalErrorException("Could not load RobotRaconteurPythonUtil.CreateStructureType function");
     }
 
     PyAutoPtr<PyObject> create_zero_array_func(PyObject_GetAttrString(rrutil_module, "CreateZeroArray"));
     if (create_zero_array_func.get() == NULL)
     {
-        throw InternalErrorException("Could not load RobotRaconeturPythonUtil.CreateZeroArray function");
+        throw InternalErrorException("Could not load RobotRaconteurPythonUtil.CreateZeroArray function");
     }
 
     PyAutoPtr<PyObject> fields(PyDict_New());
@@ -469,11 +465,6 @@ PyObject* GetNumPyDescrForType(const RR_SHARED_PTR<ServiceEntryDefinition>& e,
                 PyTuple_SetItem(f_dims.get(), j, PyLong_FromLong(f_def->ArrayLength[j]));
             }
             PyTuple_SetItem(f.get(), 2, f_dims.detach());
-
-            /*PyAutoPtr<PyObject> f_dims(PyTuple_New(1));
-            int32_t n_elems = boost::accumulate(f_def->ArrayLength, 1, std::multiplies<int32_t>());
-            PyTuple_SetItem(f_dims.get(), 0, PyLong_FromLong(n_elems));
-            PyTuple_SetItem(f.get(), 2, f_dims.detach());*/
         }
 
         if (f_def->ArrayType == DataTypes_ArrayTypes_array && f_def->ArrayVarLength)
@@ -529,11 +520,6 @@ class PackMessageElementImpl
         }
 
         PyArrayObject* data1 = (PyArrayObject*)data;
-        /*if (type1->ArrayType != DataTypes_ArrayTypes_none)
-        {
-            if (PyArray_SIZE((PyArrayObject*)data) != 1)
-            throw DataTypeException("numy.ndarray scalar structure array expected");
-        }*/
 
         if (type1->ArrayType == DataTypes_ArrayTypes_none && PyArray_SIZE(data1) != 1)
         {
@@ -610,11 +596,6 @@ class PackMessageElementImpl
         }
 
         PyArrayObject* data1 = (PyArrayObject*)data;
-        /*if (type1->ArrayType != DataTypes_ArrayTypes_none)
-        {
-            if (PyArray_SIZE((PyArrayObject*)data) != 1)
-            throw DataTypeException("numy.ndarray scalar structure array expected");
-        }*/
 
         if (type1->Type != DataTypes_varvalue_t && type1->ArrayType == DataTypes_ArrayTypes_none &&
             PyArray_SIZE(data1) != 1)
@@ -988,7 +969,7 @@ class PackMessageElementImpl
 
             PyObject* item;
 
-            while (item = PyIter_Next(iter.get()))
+            while ((item = PyIter_Next(iter.get())))
             {
                 PyAutoPtr<PyObject> item1(item);
 
@@ -1055,19 +1036,6 @@ class PackMessageElementImpl
                 {
                     throw DataTypeException("Structure type mismatch");
                 }
-
-                /*PyAutoPtr<PyObject> rrstructtype(PyObject_GetAttrString(data, "rrstructtype"));
-                if (!rrstructtype.get()) throw DataTypeException("Invalid structure, missing rrstructtype");
-                std::string typestr2 = PyObjectToUTF8(rrstructtype.get());
-                if (PyErr_Occurred())
-                {
-                    throw DataTypeException("Invalid structure, invalid rrstructtype");
-                }
-
-                if (typestr != typestr2)
-                {
-                    throw DataTypeException("Structure type mismatch");
-                }*/
 
                 element->ElementType = DataTypes_structure_t;
                 element->ElementTypeName = typestr;
@@ -1541,13 +1509,6 @@ class UnpackMessageElementImpl
                         dims2[i] = boost::lexical_cast<npy_intp>(p->Type->ArrayLength[i]);
                     }
 
-                    /*if (PyObject_SetItem(el2.get(), py_name.get(), el1) != 0)
-                    {
-                        PyErr_Print();
-                        Py_XDECREF(el1);
-                        throw DataTypeException("Could not set pod field");
-                    }*/
-
                     PyArray_Dims dims3;
                     dims3.ptr = &dims2[0];
                     dims3.len = (int)dims2.size();
@@ -1594,13 +1555,6 @@ class UnpackMessageElementImpl
                             throw DataTypeException("Could not set pod field");
                         }
                     }
-                    /*else
-                    {
-                        PyAutoPtr<PyObject> el5(PyObject_GetItem(el3.get(), py_array_str.get()));
-                        PyAutoPtr<PyObject> py_zero = PyLong_FromLong(0);
-                        PyArray_FillWithScalar((PyArrayObject*)el5.get(), py_zero.get());
-
-                    }*/
                 }
                 else
                 {
@@ -2712,14 +2666,6 @@ boost::intrusive_ptr<RRBaseArray> PackToRRArray(PyObject* array_, const boost::s
         memcpy(destrrarray->void_ptr(), bytearray_buf, bytearray_size);
         return destrrarray;
     }
-
-    /*if (_NumPyAvailable)
-    {
-        if (PyArray_Check(array_))
-        {
-            return PackToRRArray_numpy(array_, type1, destrrarray);
-        }
-    }*/
 
     if (!PySequence_Check(array_))
     {

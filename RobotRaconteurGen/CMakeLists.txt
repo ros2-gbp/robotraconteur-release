@@ -1,3 +1,21 @@
+if(NOT EMSCRIPTEN)
+    set(Boost_USE_MULTITHREADED ON)
+    set(Boost_USE_STATIC_RUNTIME OFF CACHE BOOL "")
+    find_package(
+        Boost
+        COMPONENTS date_time
+                   filesystem
+                   regex
+                   chrono
+                   atomic
+                   thread
+                   random
+                   program_options
+        REQUIRED)
+else()
+    find_package(Boost COMPONENTS date_time filesystem regex chrono random program_options REQUIRED)
+endif()
+
 set(RobotRaconteurGen_src
     CPPServiceLangGen.cpp CSharpServiceLangGen.cpp
     # VBNETServiceLangGen.cpp
@@ -19,6 +37,11 @@ endif()
 # target_compile_definitions(RobotRaconteurGen PRIVATE ROBOTRACONTEUR_ROS) else()
 target_link_libraries(RobotRaconteurGen RobotRaconteurCore)
 # endif()
+
+option(ROBOTRACONTEUR_SKIP_RPATH "Skip RPATH for shared libraries" OFF)
+if(ROBOTRACONTEUR_SKIP_RPATH)
+    set_target_properties(RobotRaconteurGen PROPERTIES SKIP_BUILD_RPATH TRUE)
+endif()
 
 rrsettargetdirs(RobotRaconteurGen "bin" "lib")
 
@@ -78,3 +101,9 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/RobotRaconteurGenerateThunk.cma
                ${CMAKE_BINARY_DIR}/RobotRaconteurGenerateThunk.cmake @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/RobotRaconteurGenerateThunk.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME})
+
+if(UNIX)
+    # install man
+    install(FILES ${CMAKE_SOURCE_DIR}/docs/man/robotraconteurgen.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1
+            RENAME robotraconteurgen.1)
+endif()

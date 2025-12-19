@@ -24,10 +24,11 @@ jobs:
         ROS_DISTRO:
         - noetic
         - humble
-        - iron
         - jazzy
+        - kilted
+        - rolling
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
       with:
         path: src/robotraconteur
     - name: ros industrial-ci
@@ -38,17 +39,17 @@ jobs:
         CMAKE_ARGS: -DPYTHON3_EXECUTABLE=/usr/bin/python3
 
   build-ros-prerelease:
-    if: false
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         ROS_DISTRO:
         - humble
-        - iron
         - jazzy
+        - kilted
+        - rolling
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
       with:
         path: src/robotraconteur
     - name: ros industrial-ci

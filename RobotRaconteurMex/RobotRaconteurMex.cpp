@@ -25,6 +25,11 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-cstyle-cast,cppcoreguidelines-avoid-c-arrays)
 
+// cSpell: ignore mxobj, skelid, servicesubscriptionid, wiresubscriptionid, pipesubscriptionid, mexobjecttype
+// cSpell: ignore subobjectsubscriptionid, skelscount, mret, numel, WAMCU, WMDAMCU, mema
+// cSpell: ignore nlhs, plhs, nrhs, prhs, mxtypeid, mxdat, mxreal, mxcount, mxdata, mxkey odef, ostub, mxstub
+// cSpell: ignore ppdef, mxindex, wdef, ninds, pind, urlc, urln, skelsp, mxskelid, mxret
+
 bool isinit = false;
 
 void rrAtExit()
@@ -960,7 +965,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
         {
             if (nlhs != 1 || nrhs != 2)
                 throw InvalidArgumentException(
-                    "RobotRaconteurMex FindNadeByName requires 2 input and 1 output arguments");
+                    "RobotRaconteurMex FindNodeByName requires 2 input and 1 output arguments");
             plhs[0] = FindNodeByName(prhs[1]);
         }
         else if (command == "UpdateDetectedNodes")
@@ -1447,11 +1452,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
             for (std::list<boost::weak_ptr<MexServiceSkel> >::const_iterator e = skels2.begin(); e != skels2.end();)
             {
                 boost::shared_ptr<MexServiceSkel> skel3 = e->lock();
-                /*if (!skel3)
-                {
-                    e=skels2.erase(e);
-                }
-                else*/
+
                 if (skel3)
                 {
                     skel3->ProcessRequests();
@@ -3456,8 +3457,8 @@ class UnpackMessageElementToMxArrayImpl
         if (tdef->Type == DataTypes_string_t)
         {
             RR_INTRUSIVE_PTR<RRArray<char> > m_str = m->CastData<RRArray<char> >();
-            std::basic_string<uint16_t> data_utf16 =
-                boost::locale::conv::utf_to_utf<uint16_t>(m_str->data(), m_str->data() + m_str->size());
+            std::basic_string<char16_t> data_utf16 =
+                boost::locale::conv::utf_to_utf<char16_t>(m_str->data(), m_str->data() + m_str->size());
 
             mwSize data_size[2];
             data_size[0] = 1;
@@ -5280,8 +5281,8 @@ void MexServiceStub::MexProcessRequests()
                     mxArray* ret2 = 0;
                     if ((ret2 = ::mexCallMATLABWithTrap(0, NULL, (int)args2.size(), &args2[0], "feval")))
                     {
-                        // mexWarnMsgTxt(std::string("Warning: error dispatching event: error occured in MATLAB
-                        // callback").c_str()); throw OperationFailedException("Error occured in MATLAB callback");
+                        // mexWarnMsgTxt(std::string("Warning: error dispatching event: error occurred in MATLAB
+                        // callback").c_str()); throw OperationFailedException("Error occurred in MATLAB callback");
                         std::string errmsg = mxToString(mxGetProperty(ret2, 0, "message"));
                         ::mexWarnMsgTxt(errmsg.c_str());
                         throw OperationFailedException(errmsg);
@@ -5295,7 +5296,7 @@ void MexServiceStub::MexProcessRequests()
                     mxArray* ret2 = 0;
                     if ((ret2 = ::mexCallMATLABWithTrap(1, lhs, (int)args2.size(), &args2[0], "feval")))
                     {
-                        // mexWarnMsgTxt(std::string("Warning: error dispatching event: error occured in MATLAB
+                        // mexWarnMsgTxt(std::string("Warning: error dispatching event: error occurred in MATLAB
                         // callback").c_str());
                         std::string errmsg = mxToString(mxGetProperty(ret2, 0, "message"));
                         ::mexWarnMsgTxt(errmsg.c_str());
@@ -7293,7 +7294,7 @@ constant_type convert_constant(const RR_SHARED_PTR<ConstantDefinition>& c1,
     if (def->Type == DataTypes_string_t)
     {
         std::string data_utf8 = c1->ValueToString();
-        std::basic_string<uint16_t> data_utf16 = boost::locale::conv::utf_to_utf<uint16_t>(data_utf8);
+        std::basic_string<char16_t> data_utf16 = boost::locale::conv::utf_to_utf<char16_t>(data_utf8);
 
         mwSize data_size[2];
         data_size[0] = 1;
@@ -7760,8 +7761,8 @@ void MexServiceSkel::ProcessRequests()
                 mxArray* mxret = NULL;
                 if ((ret2 = ::mexCallMATLABWithTrap(1, &mxret, (int)args2.size(), &args2[0], "subsref")))
                 {
-                    // mexWarnMsgTxt(std::string("Warning: error dispatching event: error occured in MATLAB
-                    // callback").c_str()); throw InvalidArgumentException("Error occured in MATLAB callback");
+                    // mexWarnMsgTxt(std::string("Warning: error dispatching event: error occurred in MATLAB
+                    // callback").c_str()); throw InvalidArgumentException("Error occurred in MATLAB callback");
                     std::string errmsg = mxToString(mxGetProperty(ret2, 0, "message"));
                     ::mexWarnMsgTxt(errmsg.c_str());
                     throw OperationFailedException(errmsg);
@@ -7826,8 +7827,8 @@ void MexServiceSkel::ProcessRequests()
 
                 if ((ret2 = ::mexCallMATLABWithTrap(0, NULL, (int)args2.size(), &args2[0], "subsasgn")))
                 {
-                    // mexWarnMsgTxt(std::string("Warning: error dispatching event: error occured in MATLAB
-                    // callback").c_str()); throw OperationFailedException("Error occured in MATLAB callback");
+                    // mexWarnMsgTxt(std::string("Warning: error dispatching event: error occurred in MATLAB
+                    // callback").c_str()); throw OperationFailedException("Error occurred in MATLAB callback");
                     std::string errmsg = mxToString(mxGetProperty(ret2, 0, "message"));
                     ::mexWarnMsgTxt(errmsg.c_str());
                     throw OperationFailedException(errmsg);
@@ -7891,8 +7892,8 @@ void MexServiceSkel::ProcessRequests()
                     mxArray* ret2 = NULL;
                     if ((ret2 = ::mexCallMATLABWithTrap(0, NULL, (int)args2.size(), &args2[0], "feval")))
                     {
-                        // mexWarnMsgTxt(std::string("Warning: error dispatching event: error occured in MATLAB
-                        // callback").c_str()); throw OperationFailedException("Error occured in MATLAB callback");
+                        // mexWarnMsgTxt(std::string("Warning: error dispatching event: error occurred in MATLAB
+                        // callback").c_str()); throw OperationFailedException("Error occurred in MATLAB callback");
                         std::string errmsg = mxToString(mxGetProperty(ret2, 0, "message"));
                         ::mexWarnMsgTxt(errmsg.c_str());
                         throw OperationFailedException(errmsg);
@@ -7904,7 +7905,7 @@ void MexServiceSkel::ProcessRequests()
                     mxArray* ret2 = NULL;
                     if ((ret2 = ::mexCallMATLABWithTrap(1, lhs, (int)args2.size(), &args2[0], "feval")))
                     {
-                        // mexWarnMsgTxt(std::string("Warning: error dispatching event: error occured in MATLAB
+                        // mexWarnMsgTxt(std::string("Warning: error dispatching event: error occurred in MATLAB
                         // callback").c_str());
                         std::string errmsg = mxToString(mxGetProperty(ret2, 0, "message"));
                         ::mexWarnMsgTxt(errmsg.c_str());
@@ -8830,7 +8831,7 @@ void MexPipeSubscription::subsasgn(const mxArray* S, const mxArray* value)
 }
 
 // Predicate would result in threading error. Disable until problem resolved.
-/*bool MexServiceSubsrciptionPredicate(const boost::shared_ptr<mxArray>& mxFunc, const ServiceInfo2& info)
+/*bool MexServiceSubscriptionPredicate(const boost::shared_ptr<mxArray>& mxFunc, const ServiceInfo2& info)
 {
     try
     {
@@ -9162,7 +9163,7 @@ static boost::shared_ptr<ServiceSubscriptionFilter> SubscribeService_LoadFilter(
         {
             /*boost::shared_ptr<mxArray> mx_predicate = boost::shared_ptr<mxArray>(mxDuplicateArray(filter_predicate1),
             ::mxDestroyArray); mexMakeArrayPersistent(mx_predicate.get()); filter2->Predicate =
-            boost::bind(&MexServiceSubsrciptionPredicate, mx_predicate, RR_BOOST_PLACEHOLDERS(_1));*/
+            boost::bind(&MexServiceSubscriptionPredicate, mx_predicate, RR_BOOST_PLACEHOLDERS(_1));*/
             throw InvalidArgumentException("ServiceSubscriptionFilter.Predicate not supported in MATLAB");
         }
 

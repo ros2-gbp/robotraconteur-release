@@ -40,8 +40,6 @@ namespace RobotRaconteur
 {
 static void RobotRaconteurNode_empty_handler() {}
 
-static void RobotRaconteurNode_empty_handler(const RR_SHARED_PTR<RobotRaconteurException>&) {}
-
 RobotRaconteurNode RobotRaconteurNode::m_s;
 RR_SHARED_PTR<RobotRaconteurNode> RobotRaconteurNode::m_sp;
 RR_WEAK_PTR<RobotRaconteurNode> RobotRaconteurNode::m_weak_sp;
@@ -280,7 +278,7 @@ void RobotRaconteurNode::UnregisterServiceType(boost::string_ref type)
     if (e1 == service_factories.end())
     {
         ROBOTRACONTEUR_LOG_DEBUG_COMPONENT(weak_this, Node, -1,
-                                           "Cannot unregister nonexistant service type \"" << type << "\"");
+                                           "Cannot unregister nonexistent service type \"" << type << "\"");
         throw InvalidArgumentException("Service type not registered");
     }
     service_factories.erase(e1);
@@ -427,6 +425,7 @@ void RobotRaconteurNode::Shutdown()
             services.clear();
         }
 
+        // cSpell: ignore endpointsv
         std::vector<RR_SHARED_PTR<Endpoint> > endpointsv;
         {
             boost::mutex::scoped_lock lock(endpoint_lock);
@@ -450,8 +449,6 @@ void RobotRaconteurNode::Shutdown()
             endpoints.clear();
         }
 
-        // std::cout << "start transport close" << std::endl;
-
         {
             if (m_Discovery)
             {
@@ -459,9 +456,15 @@ void RobotRaconteurNode::Shutdown()
             }
         }
 
+        // cSpell: ignore transportsv
+        std::vector<RR_SHARED_PTR<Transport> > transportsv;
         {
             boost::unique_lock<boost::shared_mutex> lock(transports_lock);
-            BOOST_FOREACH (RR_SHARED_PTR<Transport>& e, transports | boost::adaptors::map_values)
+            boost::copy(transports | boost::adaptors::map_values, std::back_inserter(transportsv));
+        }
+
+        {
+            BOOST_FOREACH (RR_SHARED_PTR<Transport>& e, transportsv)
             {
                 try
                 {
@@ -921,7 +924,6 @@ RR_SHARED_PTR<ServerContext> RobotRaconteurNode::RegisterService(
         c = RR_MAKE_SHARED<ServerContext>(GetServiceType(servicetype), shared_from_this());
         c->SetBaseObject(name, obj, securitypolicy);
 
-        // RegisterEndpoint(c);
         services.insert(make_pair(RR_MOVE(name.to_string()), c));
     }
 
@@ -974,7 +976,6 @@ void RobotRaconteurNode::CloseService(boost::string_ref sname)
         }
         s = e1->second;
         s->Close();
-        // DeleteEndpoint(s);
         services.erase(sname.to_string());
     }
 
@@ -1111,7 +1112,7 @@ RR_INTRUSIVE_PTR<Message> RobotRaconteurNode::SpecialRequest(const RR_INTRUSIVE_
         }
         break;
         case MessageEntryType_GetServiceDesc: {
-            // string name = (string)e.FindElement("servicename").Data;
+
             std::string name = e->ServicePath.str().to_string();
             try
             {
@@ -1217,7 +1218,7 @@ RR_INTRUSIVE_PTR<Message> RobotRaconteurNode::SpecialRequest(const RR_INTRUSIVE_
                 }
 
                 {
-                    // boost::mutex::scoped_lock lock(services_lock);
+
                     try
                     {
                         GetService(name)->RemoveClient(se);
@@ -1234,7 +1235,6 @@ RR_INTRUSIVE_PTR<Message> RobotRaconteurNode::SpecialRequest(const RR_INTRUSIVE_
                 }
                 catch (std::exception&)
                 {}
-                // eret.AddElement("servicedef", servicedef);
             }
             catch (std::exception& exp)
             {
@@ -1519,6 +1519,22 @@ RR_INTRUSIVE_PTR<Message> RobotRaconteurNode::SpecialRequest(const RR_INTRUSIVE_
                 eret->AddElement("errorstring", stringToRRArray("Authentication Failed"));
                 eret->Error = MessageErrorType_AuthenticationError;
                 break;
+            }
+
+            try
+            {
+                if (c)
+                {
+                    RR_INTRUSIVE_PTR<RRMap<std::string, RRValue> > attr = AllocateEmptyRRMap<std::string, RRValue>();
+                    attr->GetStorageContainer() = c->GetAttributes();
+                    eret->AddElement("attributes", PackMapType<std::string, RRValue>(attr));
+                }
+            }
+            catch (std::exception& exp)
+            {
+                ROBOTRACONTEUR_LOG_DEBUG_COMPONENT_PATH(
+                    weak_this, Node, m->header->ReceiverEndpoint, e->ServicePath, e->MemberName,
+                    "Could not add attributes to client connect return message: " << exp.what())
             }
         }
         break;
