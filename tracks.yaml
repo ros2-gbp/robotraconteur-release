@@ -129,7 +129,7 @@ tracks:
     last_version: 1.2.7
     name: upstream
     patches: null
-    release_inc: '1'
+    release_inc: '3'
     release_repo_url: git@github.com:ros2-gbp/robotraconteur-release.git
     release_tag: v1.2.7-ros
     ros_distro: rolling
