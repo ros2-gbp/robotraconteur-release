@@ -1,3 +1,26 @@
+## robotraconteur (rolling) - 1.2.8-1
+
+The packages in the `robotraconteur` repository were released into the `rolling` distro by running `/usr/bin/bloom-release --rosdistro rolling --track rolling --edit robotraconteur` on `Sat, 23 May 2026 01:06:27 -0000`
+
+The `robotraconteur` package was released.
+
+Version of package(s) in repository `robotraconteur`:
+
+- upstream repository: https://github.com/robotraconteur/robotraconteur.git
+- release repository: https://github.com/ros2-gbp/robotraconteur-release.git
+- rosdistro version: `1.2.7-3`
+- old version: `1.2.7-3`
+- new version: `1.2.8-1`
+
+Versions of tools used:
+
+- bloom version: `0.14.3`
+- catkin_pkg version: `1.1.0`
+- rosdep version: `0.26.0`
+- rosdistro version: `1.0.1`
+- vcstools version: `0.1.42`
+
+
 ## robotraconteur (lyrical) - 1.2.8-1
 
 The packages in the `robotraconteur` repository were released into the `lyrical` distro by running `/usr/bin/bloom-release --rosdistro lyrical --track lyrical --edit robotraconteur` on `Sat, 23 May 2026 01:04:39 -0000`
