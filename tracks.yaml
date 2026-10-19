@@ -21,11 +21,11 @@ tracks:
     patches: null
     release_inc: '1'
     release_repo_url: git@github.com:ros2-gbp/robotraconteur-release.git
-    release_tag: v1.2.8-ros
+    release_tag: v:{version}-ros
     ros_distro: humble
     vcs_type: git
     vcs_uri: https://github.com/robotraconteur/robotraconteur.git
-    version: 1.2.8
+    version: :{auto}
   iron:
     actions:
     - bloom-export-upstream :{vcs_local_uri} :{vcs_type} --tag :{release_tag} --display-uri
@@ -77,11 +77,11 @@ tracks:
     patches: null
     release_inc: '1'
     release_repo_url: git@github.com:ros2-gbp/robotraconteur-release.git
-    release_tag: v1.2.8-ros
+    release_tag: v:{version}-ros
     ros_distro: jazzy
     vcs_type: git
     vcs_uri: https://github.com/robotraconteur/robotraconteur.git
-    version: 1.2.8
+    version: :{auto}
   kilted:
     actions:
     - bloom-export-upstream :{vcs_local_uri} :{vcs_type} --tag :{release_tag} --display-uri
@@ -106,11 +106,11 @@ tracks:
     patches: null
     release_inc: '1'
     release_repo_url: git@github.com:ros2-gbp/robotraconteur-release.git
-    release_tag: v1.2.8-ros
+    release_tag: v:{version}-ros
     ros_distro: kilted
     vcs_type: git
     vcs_uri: https://github.com/robotraconteur/robotraconteur.git
-    version: 1.2.8
+    version: :{auto}
   lyrical:
     actions:
     - bloom-export-upstream :{vcs_local_uri} :{vcs_type} --tag :{release_tag} --display-uri
@@ -134,12 +134,12 @@ tracks:
     name: upstream
     patches: null
     release_inc: '1'
-    release_repo_url: null
-    release_tag: v1.2.8-ros
+    release_repo_url: git@github.com:ros2-gbp/robotraconteur-release.git
+    release_tag: v:{version}-ros
     ros_distro: lyrical
     vcs_type: git
     vcs_uri: https://github.com/robotraconteur/robotraconteur.git
-    version: 1.2.8
+    version: :{auto}
   rolling:
     actions:
     - bloom-export-upstream :{vcs_local_uri} :{vcs_type} --tag :{release_tag} --display-uri
@@ -164,8 +164,8 @@ tracks:
     patches: null
     release_inc: '1'
     release_repo_url: git@github.com:ros2-gbp/robotraconteur-release.git
-    release_tag: v1.2.8-ros
+    release_tag: v:{version}-ros
     ros_distro: rolling
     vcs_type: git
     vcs_uri: https://github.com/robotraconteur/robotraconteur.git
-    version: 1.2.8
+    version: :{auto}
